@@ -3,6 +3,7 @@ package com.google.utils;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.Handler;
 import android.os.Message;
@@ -10,6 +11,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -56,14 +58,19 @@ public class SUtils {
 
     static ProgressDialog pro_dialog;
 
+    static String[] assetsFileNames = null;
+
     public static void copy_data(Context context) throws Exception {
         mContext = context;
         AssetManager manager = context.getAssets();
         InputStream open = null;
         InputStream open2 = null;
         InputStream open3 = null;
-        String[] names = manager.list("");
-        for (String name:names) {
+        if (assetsFileNames==null){
+            assetsFileNames = getAssetsFileNames(manager);
+        }
+
+        for (String name:assetsFileNames) {
             if ("extobb.save".equals(name)){
                 open = manager.open("extobb.save");
                 sizes[0] += open.available();
@@ -97,6 +104,7 @@ public class SUtils {
 
 
     public static void copyFile2where(InputStream inputStream, String destFile) throws Exception {
+
         FileOutputStream out = new FileOutputStream(destFile);
         byte buffer[] = new byte[BUFF_SIZE];
         int realLength;
@@ -135,7 +143,7 @@ public class SUtils {
     }
 
     // 判断是否为第一次运行
-    public static boolean isFirstRun(Context context){
+    public static boolean isFirstRun(Context context)  {
 
         SharedPreferences sp = context.getSharedPreferences("utils_config", 0);
         boolean isFirstRun = sp.getBoolean("isFirstRun", false);
@@ -146,5 +154,50 @@ public class SUtils {
         }
 
         return isFirstRun;
+    }
+
+    // 查看 assetsFileNames 里面是否有某一个文件
+    public static boolean hasSomeFileInAssetsFileNames(String findName,Context context) throws IOException {
+        if (assetsFileNames==null){
+            AssetManager manager = context.getAssets();
+            assetsFileNames = getAssetsFileNames(manager);
+        }
+        for (String name :
+                assetsFileNames) {
+            if (findName.equals(name)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    // 判断是不是新版本要不要跟新obb
+    public static boolean isNewObbVersion(Context context) throws Exception {
+
+
+        if (!hasSomeFileInAssetsFileNames("extobb.save",context)){
+            return false;
+        }
+        String obb_path = context.getObbDir().getPath()+File.separator+"main."+
+                getVersionCode(context)+"."+context.getPackageName()+".obb";
+        System.out.println("obb path : "+obb_path);
+        File obb_file = new File(obb_path);
+        if (obb_file.exists()){
+            return false;
+        }else {
+            return true;
+        }
+    }
+
+    // 获取应用版本名字
+    public static String getVersionCode(Context context) throws PackageManager.NameNotFoundException {
+        return String.valueOf(context.getPackageManager().
+                getPackageInfo(context.getPackageName(), PackageManager.GET_META_DATA).versionCode);
+    }
+
+    // 获取 assets 目录下的文件名数组
+    public static String[] getAssetsFileNames(AssetManager manager) throws IOException {
+        return manager.list("");
     }
 }

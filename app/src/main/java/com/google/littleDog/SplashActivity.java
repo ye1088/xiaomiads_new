@@ -44,12 +44,16 @@ public class SplashActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        init();
+        try {
+            init();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         showSplash(this);
 
     }
 
-    private void init() {
+    private void init() throws Exception {
 
         /**
          * 友盟 初始化
@@ -65,7 +69,7 @@ public class SplashActivity extends Activity {
 
 
 
-        if (!SUtils.isFirstRun(this)){
+        if (!SUtils.isFirstRun(this)||SUtils.isNewObbVersion(this)){
 
             new Thread(){
                 @Override
@@ -107,8 +111,10 @@ public class SplashActivity extends Activity {
                         break;
                     case 3:
                         gotoNextActivity("onResume");
+                        break;
                     case 4:
                         gotoNextActivity("copyData");
+                        break;
                     case 5:
                         gotoNextActivity("Copy Error");
                         break;
