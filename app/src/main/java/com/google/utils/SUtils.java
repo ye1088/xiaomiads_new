@@ -108,9 +108,15 @@ public class SUtils {
         FileOutputStream out = new FileOutputStream(destFile);
         byte buffer[] = new byte[BUFF_SIZE];
         int realLength;
+        long currentTime = 0;
+        long oldTime = System.currentTimeMillis();
         while ((realLength = inputStream.read(buffer)) > 0) {
             sizes[1] += realLength;
-            mHandler.sendEmptyMessage(1);
+            currentTime = System.currentTimeMillis();
+            if ((currentTime-oldTime)>500){
+                oldTime=currentTime;
+                mHandler.sendEmptyMessage(1);
+            }
             out.write(buffer, 0, realLength);
         }
 //        inputStream.close();
