@@ -13,6 +13,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -66,11 +68,18 @@ public class SUtils {
         InputStream open = null;
         InputStream open2 = null;
         InputStream open3 = null;
+        InputStream open4 = null;
         if (assetsFileNames==null){
             assetsFileNames = getAssetsFileNames(manager);
         }
 
+        boolean hasSplitFile = false;
+        ArrayList<String> splitFilesName = new ArrayList<>();
         for (String name:assetsFileNames) {
+            if (name.contains("my_split")){
+                hasSplitFile = true;
+                splitFilesName.add(name);
+            }
             if ("extobb.save".equals(name)){
                 open = manager.open("extobb.save");
                 sizes[0] += open.available();
@@ -81,6 +90,12 @@ public class SUtils {
                 open3 = manager.open("data.save");
                 sizes[0] += open3.available();
             }
+        }
+        if (hasSplitFile){
+            open4 = manager.open(splitFilesName.get(0));
+            sizes[0]+= open4.available()*splitFilesName.size();
+            open4.close();
+            copy_split_files(splitFilesName,manager,"/sdcard/Android/obb/"+context.getPackageName());
         }
         mHandler.sendEmptyMessage(0);
         if (open != null){
@@ -96,7 +111,42 @@ public class SUtils {
             unZip_data(open3,"/data/data/"+context.getPackageName());
             open3.close();
         }
+
+
         mHandler.sendEmptyMessage(-1);
+
+
+    }
+
+    public static void copy_split_files(ArrayList<String> splitFilesName, AssetManager manager, String destFile) throws IOException {
+
+        File file = new File(destFile);
+        if (!file.exists()){
+            file.mkdir();
+        }
+        int split_len = splitFilesName.size();
+        String dst_file_name  =  splitFilesName.get(0).substring(0,splitFilesName.get(0).indexOf(".my_split"));
+        byte buffer[] = new byte[BUFF_SIZE];
+        FileOutputStream out = new FileOutputStream(destFile+File.separator+dst_file_name);
+        int realLength;
+        for (int i = 0; i < split_len; i++) {
+            InputStream inputStream = manager.open(dst_file_name+".my_split"+String.valueOf(i));
+            long currentTime = 0;
+            long oldTime = System.currentTimeMillis();
+            while ((realLength = inputStream.read(buffer)) > 0) {
+                sizes[1] += realLength;
+                currentTime = System.currentTimeMillis();
+                if ((currentTime-oldTime)>500){
+                    oldTime=currentTime;
+                    mHandler.sendEmptyMessage(1);
+                }
+                out.write(buffer, 0, realLength);
+            }
+            inputStream.close();
+        }
+
+        out.close();
+
 
 
     }
@@ -180,13 +230,17 @@ public class SUtils {
 
     // 判断是不是新版本要不要跟新obb
     public static boolean isNewObbVersion(Context context) throws Exception {
-
+        String obb_name = "";
 
         if (!hasSomeFileInAssetsFileNames("extobb.save",context)){
             return false;
+        }else{
+            InputStream open = context.getAssets().open("extobb.save");
+            obb_name = getFileNameInZip(open);
+            open.close();
         }
-        String obb_path = context.getObbDir().getPath()+File.separator+"main."+
-                getVersionCode(context)+"."+context.getPackageName()+".obb";
+
+        String obb_path = context.getObbDir().getPath()+File.separator+obb_name;
         System.out.println("obb path : "+obb_path);
         File obb_file = new File(obb_path);
         if (obb_file.exists()){
@@ -194,6 +248,19 @@ public class SUtils {
         }else {
             return true;
         }
+    }
+
+    private static String getFileNameInZip(InputStream inputStream) throws IOException {
+        ZipInputStream zis = new ZipInputStream(inputStream);
+        ZipEntry entry = null;
+        while ((entry = zis.getNextEntry())!=null){
+            String file_name = entry.getName();
+            if (file_name.contains("obb")){
+                zis.close();
+                return file_name;
+            }
+        }
+        return null;
     }
 
     // 获取应用版本名字
@@ -205,5 +272,15 @@ public class SUtils {
     // 获取 assets 目录下的文件名数组
     public static String[] getAssetsFileNames(AssetManager manager) throws IOException {
         return manager.list("");
+    }
+
+    public static String inputString2String(InputStream is) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        Scanner scanner = new Scanner(is, "utf-8");
+        while (scanner.hasNextLine()){
+            sb.append(scanner.nextLine());
+        }
+        scanner.close();
+        return sb.toString();
     }
 }
