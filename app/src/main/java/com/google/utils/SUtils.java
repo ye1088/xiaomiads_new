@@ -34,7 +34,7 @@ public class SUtils {
             switch (msg.what){
                 case 0:
                     Toast.makeText(mContext, "如果一直卡在这里请清除数据并给予游戏存储权限!!!!", Toast.LENGTH_LONG).show();
-                    pro_dialog = new ProgressDialog(mContext);
+
                     pro_dialog.setMax(sizes[0]);
                     pro_dialog.setTitle("拷贝数据中....");
                     pro_dialog.setCancelable(false);
@@ -42,7 +42,13 @@ public class SUtils {
                     pro_dialog.show();
                     break;
                 case 1:
+                    pro_dialog.setMax(sizes[0]);
+                    pro_dialog.setTitle("拷贝数据中....");
+                    pro_dialog.setCancelable(false);
+                    pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                    pro_dialog.show();
                     pro_dialog.setProgress(sizes[1]);
+
                     break;
                 case -1:
                     pro_dialog.dismiss();
@@ -58,7 +64,7 @@ public class SUtils {
 
 
 
-    static ProgressDialog pro_dialog;
+    static ProgressDialog pro_dialog = null;
 
     static String[] assetsFileNames = null;
 
@@ -97,6 +103,7 @@ public class SUtils {
             open4.close();
             copy_split_files(splitFilesName,manager,"/sdcard/Android/obb/"+context.getPackageName());
         }
+
         mHandler.sendEmptyMessage(0);
         if (open != null){
 
@@ -141,6 +148,7 @@ public class SUtils {
                     mHandler.sendEmptyMessage(1);
                 }
                 out.write(buffer, 0, realLength);
+                out.flush();
             }
             inputStream.close();
         }
@@ -168,6 +176,7 @@ public class SUtils {
                 mHandler.sendEmptyMessage(1);
             }
             out.write(buffer, 0, realLength);
+            out.flush();
         }
 //        inputStream.close();
         out.close();
@@ -200,6 +209,7 @@ public class SUtils {
 
     // 判断是否为第一次运行
     public static boolean isFirstRun(Context context)  {
+        pro_dialog = new ProgressDialog(context);
 
         SharedPreferences sp = context.getSharedPreferences("utils_config", 0);
         boolean isFirstRun = sp.getBoolean("isFirstRun", false);
