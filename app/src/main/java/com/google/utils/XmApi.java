@@ -88,6 +88,10 @@ public class XmApi implements AdListener {
             XmParms.BANNER_ID = pro.getProperty("banner_id");
             // 是否需要banner 广告
             if (!"0".equals(pro.getProperty("needBanner"))) XmParms.needBanner = true;
+            // banner 广告显示的位置
+            if ("0".equals(pro.getProperty("isBannerTop"))) XmParms.isBannerTop = false;
+            if ("0".equals(pro.getProperty("isBannerCanClose"))) XmParms.isBannerCanClose = false;
+            if ("0".equals(pro.getProperty("isBannerAutoHide"))) XmParms.isBannerAutoHide = false;
             if (isPortrait){
                 //竖屏开屏广告id      竖屏广告
                 XmParms.POSITION_ID_SPLASH = pro.getProperty("position_id_splash_h");

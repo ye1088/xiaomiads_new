@@ -22,7 +22,11 @@ public class XmParms {
 
 //    public static String obbname = "main.106.com.pixelbite.sm2.obb";
 //    public static long filelen = 0xDBCD33C;
+    // banner 广告相关配置
     public static boolean needBanner = false;
+    public static boolean isBannerTop = true;
+    public static boolean isBannerCanClose = true;
+    public static boolean isBannerAutoHide = true;
     public static String pkgname = "demo.ad.xiaomi.com.myapplication";
     public static String launcher = "demo.ad.xiaomi.com.myapplication.MainActivity";
 
