@@ -1,5 +1,6 @@
 package com.google.utils;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -57,6 +58,11 @@ public class SUtils {
         }
     };
 
+
+    public static int dip2px(Activity mActivity, float dpValue) {
+        final float scale = mActivity.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
+    }
 
     public static int[] getSizes() {
         return sizes;

@@ -1,27 +1,20 @@
 package com.google.littleDog;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
+import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.Toast;
 
+import com.google.utils.SUtils;
 import com.google.utils.XmParms;
 import com.umeng.analytics.MobclickAgent;
 import com.xiaomi.ad.AdListener;
@@ -29,7 +22,6 @@ import com.xiaomi.ad.adView.BannerAd;
 import com.xiaomi.ad.adView.InterstitialAd;
 import com.xiaomi.ad.common.pojo.AdError;
 import com.xiaomi.ad.common.pojo.AdEvent;
-import com.xiaomi.ad.internal.b.a;
 
 import java.io.IOException;
 
@@ -42,7 +34,7 @@ public class LittleDog implements AdListener{
     static final boolean ASK_SPLASH_AD = true; //  是否要有开屏广告
     static final boolean ASK_INTER_AD = true;   // 是否要有插屏广告
     private static final String TAG =  "xyz";
-    private static final int SHOW_BANNER =  0;
+    private static final int SHOW_BANNER_VISIBLE =  0;
     static boolean ASK_BANNER_AD = true;  // banner 广告是不是已经显示了
     static boolean  isFirstExc = true;  // 是否为第一次执行
 
@@ -52,21 +44,45 @@ public class LittleDog implements AdListener{
     private static Context mContext;
     static InterstitialAd interstitialAd;
 
+    private static final int SHOW_BANNER = 1;
     static Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
+            Message message = mHandler.obtainMessage();
+            if (flayout==null){
+                return;
+            }
             switch (msg.what){
+                case SHOW_BANNER_VISIBLE:
+
+                    if (!getRootViewIsVisible()){
+                        setVisibleBanner();
+                    }
+
+                    break;
                 case SHOW_BANNER:
-                    setVisibleBanner();
-                    Message message = mHandler.obtainMessage();
+                    if (!getRootViewIsVisible()){
+                        controlCloseButton(false);
+                        showBanner((Activity) mContext);
+                    }
                     message.what = SHOW_BANNER;
-                    mHandler.sendMessageDelayed(message,360000);
+                    mHandler.sendMessageDelayed(message,15000);
                     break;
 
             }
         }
     };
+
+    public static boolean getRootViewIsVisible(){
+        if (flayout == null){
+            return false;
+        }
+        if (flayout.getVisibility() == View.VISIBLE){
+            return true;
+        }
+        return false;
+    }
 
     public static void onCreate(Context context){
         mContext = context;
@@ -96,6 +112,7 @@ public class LittleDog implements AdListener{
     //    static FrameLayout.LayoutParams tvlayout;
     static BannerAd h5BannerAd;
     static FrameLayout flayout;
+    static ImageView button;
     private static void bannerLayout(final Activity activity){
 
         flayout = new FrameLayout(activity);
@@ -113,7 +130,7 @@ public class LittleDog implements AdListener{
 
         // 设置banner 广告的样式
 
-        WindowManager windowManager = (WindowManager) activity.getApplicationContext()
+        WindowManager windowManager = (WindowManager) activity
                 .getSystemService(activity.WINDOW_SERVICE);
         WindowManager.LayoutParams params = new WindowManager.LayoutParams();
 
@@ -129,13 +146,19 @@ public class LittleDog implements AdListener{
             scal_x_y =phone_width*1.0/ phone_heigh;
             params.width = (int) (phone_width * 0.9);
         }
-        //  强制设置为前台显示
-        params.type =WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+        //设置window type
+
+//        params.token = activity.getWindow().getDecorView().getWindowToken();
+//        params.type = WindowManager.LayoutParams.LAST_SUB_WINDOW;
+        //设置图片格式，效果为背景透明
+//        params.type = WindowManager.LayoutParams.TYPE_TOAST;
+        params.format = PixelFormat.RGBA_8888;
+        //设置浮动窗口不可聚焦（实现操作除浮动窗口外的其他可见窗口的操作）
         params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
 
 
-        params.height = (int) (188 * scal_x_y);
+        params.height = SUtils.dip2px(activity,50);
 
         /*************************************************************************************************/
 
@@ -149,7 +172,8 @@ public class LittleDog implements AdListener{
 //        flayout.setLayoutParams(layoutParams);
 
         // 等下还原
-        ImageView button = new ImageView(activity);
+
+        button = new ImageView(activity);
 
         if (XmParms.isBannerCanClose){// XmParms.isBannerCanClose
             try {
@@ -180,8 +204,8 @@ public class LittleDog implements AdListener{
 //        btn_par.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 
         btn_par.gravity = Gravity.RIGHT;;
-        btn_par.width = (int) (100*scal_x_y);
-        btn_par.height = (int) (100*scal_x_y);
+        btn_par.width = SUtils.dip2px(activity,25);
+        btn_par.height = SUtils.dip2px(activity,25);
         Log.e("LittleDog : ","width : "+btn_par.width+" height : "+ btn_par.height);
 //        btn_par.width = 100;
 //        btn_par.height = 100;
@@ -190,10 +214,9 @@ public class LittleDog implements AdListener{
         FrameLayout ban_frameLayout = new FrameLayout(activity);
         ban_frameLayout.setLayoutParams(ban_par);
 //        btn_frameLayout = new FrameLayout(activity);
-
         button.setLayoutParams(btn_par);
-//        flayout.
-//        flayout.
+        // 刚开始关闭按钮 banner广告加载成功后才 显示
+        controlCloseButton(false);
 
         flayout.addView(ban_frameLayout);
         flayout.addView(button);
@@ -206,24 +229,40 @@ public class LittleDog implements AdListener{
 //        activity.getWindow().addContentView(flayout, params);
         windowManager.addView(flayout, params);
 //        ViewGroup container = (ViewGroup) activity.findViewById(R.id.container);
-        h5BannerAd = new BannerAd(activity.getApplicationContext(), ban_frameLayout, new BannerAd.BannerListener() {
+        h5BannerAd = new BannerAd(activity, ban_frameLayout, new BannerAd.BannerListener() {
 
 
             @Override
             public void onAdEvent(AdEvent adEvent) {
+                Log.d(TAG, "onAdEvent : "+ adEvent);
                 if (adEvent.mType == AdEvent.TYPE_CLICK) {
                     Log.d(TAG, "ad has been clicked!");
+                    hideBanner();
                 } else if (adEvent.mType == AdEvent.TYPE_SKIP) {
                     Log.d(TAG, "x button has been clicked!");
-                } else if (adEvent.mType == AdEvent.TYPE_VIEW) {
-                    Log.d(TAG, "ad has been showed!");
+                } else if (adEvent.mType == AdEvent.TYPE_LOAD){
+
+                }else if (adEvent.mType == AdEvent.TYPE_VIEW) {
+                    Log.d(TAG, "ad has been showed!,这个是轮播事件");
                     isBannerShowed = true;
+                    // banner广告加载成功后才 显示关闭按钮
+                    controlCloseButton(true);
 
                 }
             }
 
 
         });
+    }
+    public static void controlCloseButton(boolean close){
+        if (button != null){
+            if (close){
+                button.setVisibility(ImageView.VISIBLE);
+            }else {
+                button.setVisibility(ImageView.INVISIBLE);
+            }
+
+        }
     }
 
     public static void showBanner(final Activity activity){
@@ -235,6 +274,7 @@ public class LittleDog implements AdListener{
         if (flayout==null){
             return;
         }
+        mHandler.sendEmptyMessageDelayed(SHOW_BANNER_VISIBLE,360000);
         flayout.setVisibility(View.INVISIBLE);
     }
     public static void hideBannerDelay30s(){
@@ -249,6 +289,7 @@ public class LittleDog implements AdListener{
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
+                        isBannerShowed = false;
                         flayout.setVisibility(View.INVISIBLE);
                     }
                 },30000);
@@ -271,16 +312,23 @@ public class LittleDog implements AdListener{
 
 
 
-    public static void init_ad(Context context){
+    public static void init_ad(final Context context){
 
 
 //        initBanner((Activity) context);
 
         if (XmParms.needBanner){
             bannerLayout((Activity) context);
-            showBanner((Activity) context);
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    showBanner((Activity) context);
+                    mHandler.sendEmptyMessage(SHOW_BANNER);
+                }
+            },35000);
             Message message = mHandler.obtainMessage();
-            message.what = SHOW_BANNER;
+            message.what = SHOW_BANNER_VISIBLE;
+            // 延迟 6 分钟 再次 让banner 可见
             mHandler.sendMessageDelayed(message,360000);
         }
 
@@ -304,10 +352,7 @@ public class LittleDog implements AdListener{
         MobclickAgent.onResume(context);
 
         LittleDog.setVisibleBanner();
-        // banner 广告自动关闭
-        if (XmParms.isBannerAutoHide){
-            hideBannerDelay30s();
-        }
+
 
         // 加载广告
         new Handler().postDelayed(new Runnable() {
@@ -318,7 +363,7 @@ public class LittleDog implements AdListener{
 
 
             }
-        },6000);
+        },3000);
 
     }
 
@@ -334,6 +379,12 @@ public class LittleDog implements AdListener{
     public static void show_ad(Context context){
         if (interstitialAd.isReady()){
             interstitialAd.show();
+            if (!isFirstExc){
+                mHandler.removeMessages(SHOW_BANNER_VISIBLE);
+                hideBanner();
+            }else {
+                isFirstExc = false;
+            }
 
         }
         interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog()) ;
