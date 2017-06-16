@@ -84,8 +84,8 @@ public class XmApi implements AdListener {
         try {
             Properties pro = new Properties();
             pro.load(context.getAssets().open("pro.properties"));
-            XmParms.APP_ID = pro.getProperty("app_id");
-            XmParms.BANNER_ID = pro.getProperty("banner_id");
+            XmParms.APP_ID = pro.getProperty("app_id").trim();
+            XmParms.BANNER_ID = pro.getProperty("banner_id").trim();
             // 是否需要banner 广告
             if (!"0".equals(pro.getProperty("needBanner"))) XmParms.needBanner = true;
             // banner 广告显示的位置
@@ -94,20 +94,20 @@ public class XmApi implements AdListener {
             if ("0".equals(pro.getProperty("isBannerAutoHide"))) XmParms.isBannerAutoHide = false;
             if (isPortrait){
                 //竖屏开屏广告id      竖屏广告
-                XmParms.POSITION_ID_SPLASH = pro.getProperty("position_id_splash_h");
-                XmParms.POSITION_ID = pro.getProperty("position_id");
+                XmParms.POSITION_ID_SPLASH = pro.getProperty("position_id_splash_h").trim();
+                XmParms.POSITION_ID = pro.getProperty("position_id").trim();
 
             }else {
                 //横屏 开屏广告id  横屏广告
-                XmParms.POSITION_ID_SPLASH = pro.getProperty("position_id_splash");
-                XmParms.POSITION_ID = pro.getProperty("position_id_h");
+                XmParms.POSITION_ID_SPLASH = pro.getProperty("position_id_splash").trim();
+                XmParms.POSITION_ID = pro.getProperty("position_id_h").trim();
             }
 //            Log.e("position_id_splash_h",XmParms.POSITION_ID_SPLASH+"  "+ isPortrait);
 
-            XmParms.pkgname = pro.getProperty("pkgname");
-            XmParms.launcher = pro.getProperty("launcher");
-            XmParms.UMENG_CHANNEL = pro.getProperty("umeng_channel");
-            XmParms.UMENG_KEY = pro.getProperty("umeng_key");
+            XmParms.pkgname = pro.getProperty("pkgname").trim();
+            XmParms.launcher = pro.getProperty("launcher").trim();
+            XmParms.UMENG_CHANNEL = pro.getProperty("umeng_channel").trim();
+            XmParms.UMENG_KEY = pro.getProperty("umeng_key").trim();
 //            XmParms.filelen = Long.parseLong(pro.getProperty("filelen"));
 //            XmParms.obbname = pro.getProperty("obbname");
         }catch (IOException e){
