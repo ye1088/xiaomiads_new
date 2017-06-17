@@ -68,8 +68,10 @@ public class LittleDog implements AdListener{
                         showBanner((Activity) mContext);
                     }
                     message.what = SHOW_BANNER;
+                    if(canShowBanner){
+                        mHandler.sendMessageDelayed(message,3000);
+                    }
 
-                    mHandler.sendMessageDelayed(message,3000);
                     break;
 
             }
@@ -330,9 +332,9 @@ public class LittleDog implements AdListener{
     // 设置 banner 广告显示
     public static void setVisibleBanner(){
         Log.d(TAG,"isInterShowed : "+isInterShowed+"  isBannerShowed : "+isBannerShowed);
-        if (flayout==null|| isInterShowed ||!isBannerShowed){
+        if (flayout==null|| isInterShowed ||!isBannerShowed){//
             canShowBanner = true;
-
+            mHandler.sendEmptyMessage(SHOW_BANNER);
             return;
         }
 

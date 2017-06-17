@@ -34,7 +34,7 @@ public class SUtils {
         public void handleMessage(Message msg) {
             switch (msg.what){
                 case 0:
-                    Toast.makeText(mContext, "如果一直卡在这里请清除数据并给予游戏存储权限!!!!", Toast.LENGTH_LONG).show();
+//                    Toast.makeText(mContext, "如果一直卡在这里请清除数据并给予游戏存储权限!!!!", Toast.LENGTH_LONG).show();
 
                     pro_dialog.setMax(sizes[0]);
                     pro_dialog.setTitle("拷贝数据中....");
