@@ -69,6 +69,7 @@ public class LittleDog implements AdListener{
                     }
                     message.what = SHOW_BANNER;
                     if(canShowBanner){
+                        mHandler.removeMessages(SHOW_BANNER);
                         mHandler.sendMessageDelayed(message,3000);
                     }
 
