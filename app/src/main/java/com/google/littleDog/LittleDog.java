@@ -66,6 +66,7 @@ public class LittleDog implements AdListener{
                     if (!getRootViewIsVisible()){
                         controlCloseButton(false);
                         showBanner((Activity) mContext);
+                        Log.d(TAG,"SHOW_BANNER : handler");
                     }
                     message.what = SHOW_BANNER;
                     if(canShowBanner){
@@ -288,6 +289,7 @@ public class LittleDog implements AdListener{
 
     public static void showBanner(final Activity activity){
         isBannerShowed = false;
+        Log.d(TAG,"XmParms.BANNER_ID : "+XmParms.BANNER_ID);
         h5BannerAd.show(XmParms.BANNER_ID);
     }
 
@@ -332,10 +334,12 @@ public class LittleDog implements AdListener{
     }
     // 设置 banner 广告显示
     public static void setVisibleBanner(){
+//        flayout.setVisibility(View.VISIBLE);
         Log.d(TAG,"isInterShowed : "+isInterShowed+"  isBannerShowed : "+isBannerShowed);
         if (flayout==null|| isInterShowed ||!isBannerShowed){//
             canShowBanner = true;
             mHandler.sendEmptyMessage(SHOW_BANNER);
+
             return;
         }
 
@@ -414,6 +418,8 @@ public class LittleDog implements AdListener{
     public static void onPause(Context context){
 
         MobclickAgent.onPause(context);
+//        mHandler.removeMessages(SHOW_BANNER_VISIBLE);
+//        mHandler.removeMessages(SHOW_BANNER);
     }
 
 
@@ -422,9 +428,8 @@ public class LittleDog implements AdListener{
 
     public static void show_ad(Context context){
         if (interstitialAd.isReady()){
-
+            mHandler.removeMessages(SHOW_BANNER_VISIBLE);
             if (!isFirstExc){
-                mHandler.removeMessages(SHOW_BANNER_VISIBLE);
                 hideBanner();
             }else {
                 isFirstExc = false;
