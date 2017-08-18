@@ -1,11 +1,14 @@
 package com.google.littleDog;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -33,6 +36,7 @@ public class SplashActivity extends Activity {
     private static boolean isAdSkip = true; // 是否点广告跳过
     private static final String TAG = "SplashActivity";
     private static final boolean ISDEBUG = false;
+    private static boolean has_permission = false;
     private boolean dataIsCopy = false;
     private boolean splashIsShow = false;
 
@@ -43,14 +47,54 @@ public class SplashActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        try {
-            init();
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (SUtils.isGrantExternalRW(this)){
+            has_permission = true;
+            try {
+
+                init();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            showSplash(this);
         }
-        showSplash(this);
 
+
+
+
+    }
+
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 1) {
+            for (int i = 0; i < permissions.length; i++) {
+                String permission = permissions[i];
+                int grantResult = grantResults[i];
+
+                if (permission.equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    if (grantResult == PackageManager.PERMISSION_GRANTED) {
+                        //授权成功后的逻辑
+                        has_permission = true;
+                        try {
+
+                            init();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        showSplash(this);
+
+
+                    } else {
+                        requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                    }
+                }
+            }
+        }
     }
 
     private void init() throws Exception {
@@ -139,7 +183,7 @@ public class SplashActivity extends Activity {
     public void showSplash(final Context context){
             Log.e(ADPID,"ASK_SPLASH_AD");
         // 隐藏标题栏
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         // 隐藏状态栏
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -216,13 +260,16 @@ public class SplashActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        MobclickAgent.onResume(this);
+        if (has_permission){
+            MobclickAgent.onResume(this);
 
-        if (splashIsShow){
-            handler.sendEmptyMessage(1);
+            if (splashIsShow){
+                handler.sendEmptyMessage(1);
+            }
+
+            splashIsShow = true;
         }
 
-        splashIsShow = true;
 //        if (isAdClick){
 //            handler.sendEmptyMessageDelayed(3,1000);
 //        }
@@ -231,7 +278,10 @@ public class SplashActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        MobclickAgent.onPause(this);
+        if (has_permission){
+            MobclickAgent.onPause(this);
+        }
+
 
     }
 

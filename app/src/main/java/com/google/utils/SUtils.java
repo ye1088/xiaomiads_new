@@ -1,11 +1,13 @@
 package com.google.utils;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
@@ -83,6 +85,7 @@ public class SUtils {
         InputStream open2 = null;
         InputStream open3 = null;
         InputStream open4 = null;
+        InputStream open5 = null;
         if (assetsFileNames==null){
             assetsFileNames = getAssetsFileNames(manager);
         }
@@ -103,6 +106,9 @@ public class SUtils {
             }else if ("data.save".equals(name)){
                 open3 = manager.open("data.save");
                 sizes[0] += open3.available();
+            }else if ("mcdata".equals(name)){
+                open5 = manager.open("mcdata");
+                sizes[0] += open5.available();
             }
         }
         if (hasSplitFile){
@@ -126,12 +132,39 @@ public class SUtils {
             unZip_data(open3,"/data/data/"+context.getPackageName());
             open3.close();
         }
+        if (open5 != null){
+            unZip_data(open4,"/sdcard/huluxia/mctool/");
+            open5.close();
+        }
 
 
         mHandler.sendEmptyMessage(-1);
 
 
     }
+
+
+
+    /**
+     * 判断是否拥有权限
+     * @param activity
+     * @return
+     */
+    public static boolean isGrantExternalRW(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && activity.checkSelfPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            activity.requestPermissions(new String[]{
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, 1);
+
+            return false;
+        }
+
+        return true;
+    }
+
 
     public static void copy_split_files(ArrayList<String> splitFilesName, AssetManager manager, String destFile) throws IOException {
 
