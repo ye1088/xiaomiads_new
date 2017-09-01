@@ -266,15 +266,14 @@ public class SUtils {
     }
 
     // 判断是否为第一次运行
-    // 判断是否为第一次运行
     public static boolean isFirstRun(Context context)  {
         pro_dialog = new ProgressDialog(context);
 
         SharedPreferences sp = context.getSharedPreferences("utils_config", 0);
-        boolean isFirstRun = sp.getBoolean("isFirstRun", true);
-        if (isFirstRun){
+        boolean isFirstRun = sp.getBoolean("isFirstRun", false);
+        if (!isFirstRun){
             SharedPreferences.Editor edit = sp.edit();
-            edit.putBoolean("isFirstRun", false);
+            edit.putBoolean("isFirstRun", true);
             edit.commit();
         }
 
