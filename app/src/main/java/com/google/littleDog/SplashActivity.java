@@ -76,7 +76,7 @@ public class SplashActivity extends Activity {
                 String permission = permissions[i];
                 int grantResult = grantResults[i];
 
-                if (permission.equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                if (permission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     if (grantResult == PackageManager.PERMISSION_GRANTED) {
                         //授权成功后的逻辑
                         has_permission = true;
@@ -90,7 +90,7 @@ public class SplashActivity extends Activity {
 
 
                     } else {
-                        requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                     }
                 }
             }
@@ -113,7 +113,7 @@ public class SplashActivity extends Activity {
 
 
 
-        if (!SUtils.isFirstRun(this)||SUtils.isNewObbVersion(this)){
+        if (SUtils.isFirstRun(this)||SUtils.isNewObbVersion(this)){
 
             new Thread(){
                 @Override
