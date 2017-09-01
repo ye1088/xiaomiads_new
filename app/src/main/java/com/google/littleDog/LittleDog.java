@@ -154,7 +154,7 @@ public class LittleDog implements AdListener{
 //            scal_x_y =phone_width*1.0/ phone_heigh;
 //            params.width = (int) (phone_width * 0.9);
 //        }
-        params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+
         //设置window type
 
 //        params.token = activity.getWindow().getDecorView().getWindowToken();
@@ -163,6 +163,7 @@ public class LittleDog implements AdListener{
 //        params.type = WindowManager.LayoutParams.TYPE_TOAST;
 //        params.format = PixelFormat.RGBA_8888;
         //设置浮动窗口不可聚焦（实现操作除浮动窗口外的其他可见窗口的操作）
+        params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
         params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
 

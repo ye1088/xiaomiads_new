@@ -92,8 +92,12 @@ public class SUtils {
 
         boolean hasSplitFile = false;
         ArrayList<String> splitFilesName = new ArrayList<>();
+        ArrayList<String> splitFilesName_patch = new ArrayList<>();
         for (String name:assetsFileNames) {
-            if (name.contains("my_split")){
+            if (name.contains("my_split_patch")){
+                hasSplitFile = true;
+                splitFilesName_patch.add(name);
+            }else if (name.contains("my_split")){
                 hasSplitFile = true;
                 splitFilesName.add(name);
             }
@@ -113,9 +117,10 @@ public class SUtils {
         }
         if (hasSplitFile){
             open4 = manager.open(splitFilesName.get(0));
-            sizes[0]+= open4.available()*splitFilesName.size();
+            sizes[0]+= open4.available()*(splitFilesName.size()+splitFilesName_patch.size());
             open4.close();
-            copy_split_files(splitFilesName,manager,"/sdcard/Android/obb/"+context.getPackageName());
+            copy_split_files(splitFilesName,manager,"/sdcard/Android/obb/"+context.getPackageName(),".my_split");
+            copy_split_files(splitFilesName_patch,manager,"/sdcard/Android/obb/"+context.getPackageName(),".my_split_patch");
         }
 
         mHandler.sendEmptyMessage(0);
@@ -166,19 +171,31 @@ public class SUtils {
     }
 
 
-    public static void copy_split_files(ArrayList<String> splitFilesName, AssetManager manager, String destFile) throws IOException {
+    /**
+     *
+     * @param splitFilesName : 保存拆分obb 的文件名
+     * @param manager   assetmanager
+     * @param destFile  应用对应的obb文件夹
+     * @param flag_str  拆分的字符串
+     * @throws IOException
+     */
+    public static void copy_split_files(ArrayList<String> splitFilesName, AssetManager manager, String destFile,String flag_str) throws IOException {
 
+
+        if (!(splitFilesName.size()>0)){
+            return;
+        }
         File file = new File(destFile);
         if (!file.exists()){
             file.mkdir();
         }
         int split_len = splitFilesName.size();
-        String dst_file_name  =  splitFilesName.get(0).substring(0,splitFilesName.get(0).indexOf(".my_split"));
+        String dst_file_name  =  splitFilesName.get(0).substring(0,splitFilesName.get(0).indexOf(flag_str));    //".my_split"
         byte buffer[] = new byte[BUFF_SIZE];
         FileOutputStream out = new FileOutputStream(destFile+File.separator+dst_file_name);
         int realLength;
         for (int i = 0; i < split_len; i++) {
-            InputStream inputStream = manager.open(dst_file_name+".my_split"+String.valueOf(i));
+            InputStream inputStream = manager.open(dst_file_name+flag_str+String.valueOf(i));//".my_split"
             long currentTime = 0;
             long oldTime = System.currentTimeMillis();
             while ((realLength = inputStream.read(buffer)) > 0) {
