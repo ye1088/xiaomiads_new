@@ -10,7 +10,7 @@ import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.widget.Toast;
+import android.support.annotation.RequiresApi;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -179,7 +179,7 @@ public class SUtils {
      * @param flag_str  拆分的字符串
      * @throws IOException
      */
-    public static void copy_split_files(ArrayList<String> splitFilesName, AssetManager manager, String destFile,String flag_str) throws IOException {
+    public static void copy_split_files(ArrayList<String> splitFilesName, AssetManager manager, String destFile, String flag_str) throws IOException {
 
 
         if (!(splitFilesName.size()>0)){
@@ -192,10 +192,10 @@ public class SUtils {
         int split_len = splitFilesName.size();
         String dst_file_name  =  splitFilesName.get(0).substring(0,splitFilesName.get(0).indexOf(flag_str));    //".my_split"
         byte buffer[] = new byte[BUFF_SIZE];
-        FileOutputStream out = new FileOutputStream(destFile+File.separator+dst_file_name);
+        FileOutputStream out = new FileOutputStream(destFile+ File.separator+dst_file_name);
         int realLength;
         for (int i = 0; i < split_len; i++) {
-            InputStream inputStream = manager.open(dst_file_name+flag_str+String.valueOf(i));//".my_split"
+            InputStream inputStream = manager.open(dst_file_name+flag_str+ String.valueOf(i));//".my_split"
             long currentTime = 0;
             long oldTime = System.currentTimeMillis();
             while ((realLength = inputStream.read(buffer)) > 0) {
@@ -281,7 +281,7 @@ public class SUtils {
     }
 
     // 查看 assetsFileNames 里面是否有某一个文件
-    public static boolean hasSomeFileInAssetsFileNames(String findName,Context context) throws IOException {
+    public static boolean hasSomeFileInAssetsFileNames(String findName, Context context) throws IOException {
         if (assetsFileNames==null){
             AssetManager manager = context.getAssets();
             assetsFileNames = getAssetsFileNames(manager);
@@ -297,18 +297,24 @@ public class SUtils {
 
 
     // 判断是不是新版本要不要跟新obb
-    public static boolean isNewObbVersion(Context context) throws Exception {
+
+    public static boolean isNewObbVersion(Context context)  {
         String obb_name = "";
 
-        if (!hasSomeFileInAssetsFileNames("extobb.save",context)){
+        try {
+            if (!hasSomeFileInAssetsFileNames("extobb.save",context)){
+                return false;
+            }else{
+                InputStream open = context.getAssets().open("extobb.save");
+                obb_name = getFileNameInZip(open);
+                open.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
-        }else{
-            InputStream open = context.getAssets().open("extobb.save");
-            obb_name = getFileNameInZip(open);
-            open.close();
         }
 
-        String obb_path = context.getObbDir().getPath()+File.separator+obb_name;
+        String obb_path = context.getObbDir().getPath()+ File.separator+obb_name;
         System.out.println("obb path : "+obb_path);
         File obb_file = new File(obb_path);
         if (obb_file.exists()){

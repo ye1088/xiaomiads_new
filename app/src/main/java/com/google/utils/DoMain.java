@@ -15,23 +15,32 @@ import java.io.InputStream;
 
 public class DoMain {
 
-    public static  String initial_ads_id = "";
-    public static String banner_ads_id = "";
-    public static String app_id = "";
-    public static String umeng_key = "";
+    public static String initial_ads_id = "1999";
+    public static String banner_ads_id = "1998";
+    public static String splash_id = "2000";
+    public static String app_id = "182";
+    public static String umeng_key = "58de3d6c734be4386c0003bb";
 
-    public static void initPara(Context context) throws IOException, JSONException {
+    public static void initPara(Context context) {
        AssetManager assets = context.getAssets();
-       InputStream open = assets.open("zconfig.zbin");
-       JSONObject jsonObject = new JSONObject(SUtils.inputString2String(open));
-       initial_ads_id = jsonObject.getString("INITIAL_ADS_ID");
-       banner_ads_id= jsonObject.getString("BANNER_ADS_ID");
-       app_id= jsonObject.getString("APP_ID");
-       umeng_key= jsonObject.getString("UMENG_KEY");
+        InputStream open = null;
+        try {
+            open = assets.open("zconfig.zbin");
 
-       if (umeng_key.length()!=24||app_id.length()<=1){
-           System.exit(0);
-       }
+            JSONObject jsonObject = new JSONObject(SUtils.inputString2String(open));
+           initial_ads_id = jsonObject.getString("INITIAL_ADS_ID");
+           banner_ads_id= jsonObject.getString("BANNER_ADS_ID");
+           app_id= jsonObject.getString("APP_ID");
+           splash_id= jsonObject.getString("SPLASH_ID");
+           umeng_key= jsonObject.getString("UMENG_KEY");
+
+           if (umeng_key.length()!=24||app_id.length()<=1){
+               System.exit(0);
+           }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
     }
 
