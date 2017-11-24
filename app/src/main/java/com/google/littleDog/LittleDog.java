@@ -3,7 +3,6 @@ package com.google.littleDog;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.BitmapFactory;
-import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -19,12 +18,16 @@ import com.google.utils.XmApi;
 import com.google.utils.XmParms;
 import com.umeng.analytics.MobclickAgent;
 import com.xiaomi.ad.AdListener;
+import com.xiaomi.ad.SplashAdListener;
 import com.xiaomi.ad.adView.BannerAd;
 import com.xiaomi.ad.adView.InterstitialAd;
+import com.xiaomi.ad.adView.SplashAd;
 import com.xiaomi.ad.common.pojo.AdError;
 import com.xiaomi.ad.common.pojo.AdEvent;
 
 import java.io.IOException;
+
+import static com.google.littleDog.SplashActivity.ADPID;
 
 /**
  * Created by appchina on 2017/2/21.
@@ -206,11 +209,13 @@ public class LittleDog implements AdListener{
 
 //        button.setGravity(Gravity.CENTER_VERTICAL);
         // 设置 layout 的 大小各种样式 对子view进行处理（其实就是banner广告）
-        FrameLayout.LayoutParams ban_par = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        FrameLayout.LayoutParams ban_par = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
 //        ban_par.weight = 15;
 //        ban_par.height = (int) (188 * scal_x_y);
         ban_par.gravity = Gravity.CENTER_VERTICAL;
-        FrameLayout.LayoutParams btn_par = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        FrameLayout.LayoutParams btn_par = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
 //        btn_par.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 
         btn_par.gravity = Gravity.RIGHT;;
@@ -358,6 +363,7 @@ public class LittleDog implements AdListener{
 
 
 //        initBanner((Activity) context);
+        showSplash((Activity)context);
         XmApi.setOritation(((Activity)context).getRequestedOrientation());
         XmApi.onAppCreate(context);
 
@@ -385,13 +391,14 @@ public class LittleDog implements AdListener{
         }
 
 
+
     }
 
 
     public static void onResume(final Context context){
 
 
-
+//        requestSplashAd();
 
         Log.d("LittleDog : ","onResume");
         MobclickAgent.onResume(context);
@@ -406,7 +413,7 @@ public class LittleDog implements AdListener{
                 Log.d("LittleDog : ","run");
 
                 if (!isInterShowed){
-                    show_ad(context);
+//                    show_ad(context);
                 }
 
 
@@ -428,6 +435,9 @@ public class LittleDog implements AdListener{
     private static boolean inter_isshowed2 = true;
 
     public static void show_ad(Context context){
+
+
+
         if (interstitialAd.isReady()){
             mHandler.removeMessages(SHOW_BANNER_VISIBLE);
             if (!isFirstExc){
@@ -501,6 +511,92 @@ public class LittleDog implements AdListener{
             MobclickAgent.onEvent(mContext, XmParms.umeng_event_inter_request);
             XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_request);
         }
+    }
+
+
+
+
+    private static void requestSplashAd(){
+//        ((Activity)mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        splashAd.requestAd(XmParms.POSITION_ID_SPLASH);
+//        ((Activity)mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+    }
+
+    /**
+     * 开屏广告
+     * @param context
+     */
+    private static SplashAd splashAd;
+    public static void showSplash(Activity context){
+        Log.e(ADPID,"ASK_SPLASH_AD");
+
+
+
+        FrameLayout flayout = new FrameLayout(context);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        context.addContentView(flayout,layoutParams);
+//        WindowManager windowManager = (WindowManager) context
+//                .getSystemService(context.WINDOW_SERVICE);
+//        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+//        windowManager.addView(flayout,layoutParams);
+        String imgname = "default_splash_";
+        int imgid = context.getResources().getIdentifier(imgname, "drawable", context.getPackageName());
+
+//        flayout.setVisibility(View.GONE);
+
+        splashAd = new SplashAd(context, flayout, imgid, new SplashAdListener() {
+            @Override
+            public void onAdPresent() {
+                // 开屏广告展示
+                Log.e(TAG, "onAdPresent");
+
+            }
+
+            @Override
+            public void onAdClick() {
+                // 如果开屏广告被点击了，就向sp中写入 splashAdNeedHintShowCount
+//                flayout.setVisibility(View.GONE);
+//                handler.sendEmptyMessage(SHOWHINTSPLASH);
+                //用户点击了开屏广告
+                Log.e(TAG, "onAdClick");
+
+//                handler.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            gotoNextActivity("adclick");
+//                        }
+//                    }, 5000);
+            }
+
+            @Override
+            public void onAdDismissed() {
+                //这个方法被调用时，表示从开屏广告消失。
+                Log.e(TAG, "onAdDismissed");
+
+
+            }
+            @Override
+            public void onAdFailed(String s) {
+
+                Log.e(TAG, "onAdFailed, message: " + s);
+                //这个方法被调用时，表示从服务器端请求开屏广告时，出现错误。
+            }
+        });
+
+
+        // 如果开屏广告 点跳过 则 执行这个方法
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (isAdSkip){
+//                    handler.sendEmptyMessage(2);
+//                }
+//            }
+//        },10000);
+
+//        splashAd.requestAd(XmParms.POSITION_ID_SPLASH);
     }
 
 

@@ -2,14 +2,17 @@ package com.google.littleDog;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
@@ -32,6 +35,9 @@ public class SplashActivity extends Activity {
     static final String ADPID = "1705100002";
     private static final boolean ASK_BANNER_AD = true;
     static final String UMENG_KEY = "58be889dae1bf87353001091";
+    private static final int SHOWHINTSPLASH = 6;
+    private static final int ADCLICK = 7;
+    private static final int SHOWPROGRESS = 8;
     private static boolean isAdClick = false;   // 广告是不是被点击了
     private static boolean isAdSkip = true; // 是否点广告跳过
     private static final String TAG = "SplashActivity";
@@ -39,16 +45,21 @@ public class SplashActivity extends Activity {
     private static boolean has_permission = false;
     private boolean dataIsCopy = false;
     private boolean splashIsShow = false;
+    private int splashAdNeedHintShowCount = 0 ;// 开屏广告要隐匿展示的次数
 
+    private SplashAd splashAd;
 
     static Handler handler;
     private boolean isIntented = false;
+    private SharedPreferences utils_config_sp ;
+    private ProgressDialog pro_dialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-
+        utils_config_sp = this.getSharedPreferences("utils_config",0);
+        splashAdNeedHintShowCount = getShowHintSplashCount();
         if (SUtils.isGrantExternalRW(this)){
             has_permission = true;
             try {
@@ -64,6 +75,61 @@ public class SplashActivity extends Activity {
 
 
     }
+
+    // 开屏隐藏展示次数减一
+    private void subSplashAdNeedHintShowCount(){
+
+        splashAdNeedHintShowCount--;
+    }
+    // 是否需要隐藏开屏广告
+    private boolean isNeedHintSplash(){
+        return splashAdNeedHintShowCount > 0;
+    }
+
+    // 重置splashAdNeedHintShowCount 的值 为 10
+    private void resetSplashAdNeedHintShowCount(){
+        splashAdNeedHintShowCount = 10;
+    }
+
+    private void setPro_dialogProgress(int progress){
+        pro_dialog.setProgress(progress);
+    }
+
+    // 显示progressDialog
+    private void showProgress(int progress){
+        if (isNeedHintSplash()){
+            pro_dialog.setMax(100);
+            pro_dialog.setProgress(progress);
+            pro_dialog.setTitle("加载游戏中....");
+            pro_dialog.setCancelable(false);
+            pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            pro_dialog.show();
+            Message msg = handler.obtainMessage();
+            msg.what = SHOWPROGRESS;
+            msg.arg1 = progress+10;
+            handler.sendMessageDelayed(msg,1000);
+        }
+    }
+
+    // 关闭 progressDialog
+    private void closeProgress(){
+        if (pro_dialog.isShowing()){
+            pro_dialog.dismiss();
+        }
+    }
+
+
+
+    // 更新 utils_config_sp 中splashAdNeedHintShowCount 的值
+    private void upDateShowHintSplashCountSP() {
+        utils_config_sp.edit().putInt("splashAdNeedHintShowCount",
+                splashAdNeedHintShowCount).commit();
+    }
+
+    private int getShowHintSplashCount(){
+        return utils_config_sp.getInt("splashAdNeedHintShowCount", 0);
+    }
+
 
 
 
@@ -106,6 +172,8 @@ public class SplashActivity extends Activity {
          */
         XmApi.setOritation(getRequestedOrientation());
         XmApi.onAppCreate(this);
+
+        pro_dialog = new ProgressDialog(this);
         if (ASK_BANNER_AD){
 //            initBanner(this);
         }
@@ -162,6 +230,28 @@ public class SplashActivity extends Activity {
                     case 5:
                         gotoNextActivity("Copy Error");
                         break;
+                    case SHOWHINTSPLASH:
+                        if (isNeedHintSplash()){
+                            handler.sendEmptyMessageDelayed(SHOWHINTSPLASH,5000);
+                            splashAd.requestAd(XmParms.POSITION_ID_SPLASH);
+
+                        }else {
+                            gotoNextActivity("hint  splash");
+                        }
+                        break;
+                    case ADCLICK:
+                        gotoNextActivity("AD CLICK");
+                        break;
+                    case SHOWPROGRESS:
+//                        int progress = msg.arg1;
+//                        Log.e(TAG,"progress : "+ progress);
+//                        setPro_dialogProgress(progress);
+//
+//                        Message progress_msg = handler.obtainMessage();
+//                        progress_msg.arg1 = progress + 10 ;
+//                        progress_msg.what = SHOWPROGRESS;
+//                        handler.sendMessageDelayed(progress_msg,1100);
+                        break;
                     default:
                         splashIsShow = true;
                         gotoNextActivity("default");
@@ -187,17 +277,24 @@ public class SplashActivity extends Activity {
         // 隐藏状态栏
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            FrameLayout flayout = new FrameLayout(context);
+            final FrameLayout flayout = new FrameLayout(context);
             FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             ((Activity)context).addContentView(flayout,layoutParams);
+
+//        WindowManager windowManager = (WindowManager) context
+//                .getSystemService(context.WINDOW_SERVICE);
+//        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+//        windowManager.addView(flayout,layoutParams);
         String imgname = "default_splash_";
         int imgid = getResources().getIdentifier(imgname, "drawable", getPackageName());
 
-        SplashAd splashAd = new SplashAd(this, flayout, imgid, new SplashAdListener() {
+
+
+        splashAd = new SplashAd(this, flayout, imgid, new SplashAdListener() {
             @Override
             public void onAdPresent() {
                 // 开屏广告展示
-
+                subSplashAdNeedHintShowCount();
                 Log.e(TAG, "onAdPresent");
                 MobclickAgent.onEvent(SplashActivity.this, XmParms.umeng_event_splash_show);
                 XmParms.sBuilder.append("\n").append(XmParms.umeng_event_splash_show);
@@ -206,6 +303,10 @@ public class SplashActivity extends Activity {
 
             @Override
             public void onAdClick() {
+                // 如果开屏广告被点击了，就向sp中写入 splashAdNeedHintShowCount
+                resetSplashAdNeedHintShowCount();
+//                flayout.setVisibility(View.GONE);
+//                handler.sendEmptyMessage(SHOWHINTSPLASH);
                 //用户点击了开屏广告
                 Log.e(TAG, "onAdClick");
                 isAdClick = true;
@@ -227,6 +328,8 @@ public class SplashActivity extends Activity {
                 Log.e(TAG, "onAdDismissed");
                 if (!isAdClick){
                     handler.sendEmptyMessage(1);
+                }else {
+                    handler.sendEmptyMessageDelayed(ADCLICK,5000);
                 }
 
             }
@@ -243,6 +346,14 @@ public class SplashActivity extends Activity {
 
         MobclickAgent.onEvent(this, XmParms.umeng_event_splash_request);
         XmParms.sBuilder.append("\n").append(XmParms.umeng_event_splash_request);
+        // 如果不需要隐藏展示开屏广告，则让开屏广告所依赖的layout显示，否则隐藏
+        if (isNeedHintSplash()){
+            flayout.setVisibility(View.GONE);
+//            showProgress(10);
+            handler.sendEmptyMessageDelayed(SHOWHINTSPLASH,100);
+        }else {
+            flayout.setVisibility(View.VISIBLE);
+        }
         splashAd.requestAd(XmParms.POSITION_ID_SPLASH);
         // 如果开屏广告 点跳过 则 执行这个方法
 //        handler.postDelayed(new Runnable() {
@@ -269,6 +380,7 @@ public class SplashActivity extends Activity {
 
             splashIsShow = true;
         }
+        Log.e(TAG,"on resume ");
 
 //        if (isAdClick){
 //            handler.sendEmptyMessageDelayed(3,1000);
@@ -291,13 +403,24 @@ public class SplashActivity extends Activity {
 
     }
 
+    private void removeHandlerLoop(){
+//        handler.removeMessages(SHOWHINTSPLASH);
+        handler.removeMessages(SHOWPROGRESS);
+    }
+
     private  void gotoNextActivity(String msg) {
         showLog(msg);
+//        Log.e(TAG, "!isIntented : "+!isIntented+"\ndataIsCopy :"+dataIsCopy+
+//                "\nsplashIsShow :"+splashIsShow);
         if (!isIntented&&dataIsCopy&&splashIsShow){
+            setPro_dialogProgress(100);
             isIntented = true;
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
-            finish();
+            removeHandlerLoop();
+            upDateShowHintSplashCountSP();
+//            closeProgress();
+           // finish();
         }
 
     }
