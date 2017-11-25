@@ -41,6 +41,7 @@ public class LittleDog implements AdListener{
     private static final int SHOW_BANNER_VISIBLE =  0;
     static boolean ASK_BANNER_AD = true;  // banner 广告是不是已经显示了
     static boolean  isFirstExc = true;  // 是否为第一次执行
+    private static boolean isOnPause = false;
 
 
 
@@ -49,6 +50,7 @@ public class LittleDog implements AdListener{
     static InterstitialAd interstitialAd;
 
     private static final int SHOW_BANNER = 1;
+    private static final int HINTSPLASH = 2;    // 显示隐藏性的开屏广告
     static Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -72,11 +74,15 @@ public class LittleDog implements AdListener{
                         Log.d(TAG,"SHOW_BANNER : handler");
                     }
                     message.what = SHOW_BANNER;
-                    if(canShowBanner){
+                    if(canShowBanner&&!isOnPause){
                         mHandler.removeMessages(SHOW_BANNER);
                         mHandler.sendMessageDelayed(message,3000);
                     }
 
+                    break;
+                case HINTSPLASH:
+                    requestSplashAd();
+                    mHandler.sendEmptyMessageDelayed(HINTSPLASH,60000);
                     break;
 
             }
@@ -398,8 +404,9 @@ public class LittleDog implements AdListener{
     public static void onResume(final Context context){
 
 
+        isOnPause = false;
 //        requestSplashAd();
-
+        mHandler.sendEmptyMessage(HINTSPLASH);
         Log.d("LittleDog : ","onResume");
         MobclickAgent.onResume(context);
 
@@ -413,7 +420,7 @@ public class LittleDog implements AdListener{
                 Log.d("LittleDog : ","run");
 
                 if (!isInterShowed){
-//                    show_ad(context);
+                    show_ad(context);
                 }
 
 
@@ -425,9 +432,10 @@ public class LittleDog implements AdListener{
 
     public static void onPause(Context context){
 
+        isOnPause = true;
         MobclickAgent.onPause(context);
 //        mHandler.removeMessages(SHOW_BANNER_VISIBLE);
-//        mHandler.removeMessages(SHOW_BANNER);
+        mHandler.removeMessages(HINTSPLASH);
     }
 
 
@@ -516,6 +524,7 @@ public class LittleDog implements AdListener{
 
 
 
+    // 请求开屏广告
     private static void requestSplashAd(){
 //        ((Activity)mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
@@ -534,6 +543,7 @@ public class LittleDog implements AdListener{
 
 
         FrameLayout flayout = new FrameLayout(context);
+        flayout.setVisibility(View.GONE);
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT);
         context.addContentView(flayout,layoutParams);

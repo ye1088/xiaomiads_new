@@ -13,6 +13,7 @@ public class XmParms {
 
     public static boolean isdebug = false;
 
+    public static boolean isHengPin = true;
 
 
     public static boolean showInterstitialSplash = false;

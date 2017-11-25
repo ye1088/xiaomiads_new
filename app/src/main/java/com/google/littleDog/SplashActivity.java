@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,7 +41,7 @@ public class SplashActivity extends Activity {
     private static final int SHOWPROGRESS = 8;
     private static boolean isAdClick = false;   // 广告是不是被点击了
     private static boolean isAdSkip = true; // 是否点广告跳过
-    private static final String TAG = "SplashActivity";
+    private static final String TAG = "SplashActivity_xyz";
     private static final boolean ISDEBUG = false;
     private static boolean has_permission = false;
     private boolean dataIsCopy = false;
@@ -59,7 +60,7 @@ public class SplashActivity extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         utils_config_sp = this.getSharedPreferences("utils_config",0);
-        splashAdNeedHintShowCount = getShowHintSplashCount();
+//        splashAdNeedHintShowCount = getShowHintSplashCount();
         if (SUtils.isGrantExternalRW(this)){
             has_permission = true;
             try {
@@ -97,18 +98,18 @@ public class SplashActivity extends Activity {
 
     // 显示progressDialog
     private void showProgress(int progress){
-        if (isNeedHintSplash()){
-            pro_dialog.setMax(100);
-            pro_dialog.setProgress(progress);
-            pro_dialog.setTitle("加载游戏中....");
-            pro_dialog.setCancelable(false);
-            pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            pro_dialog.show();
-            Message msg = handler.obtainMessage();
-            msg.what = SHOWPROGRESS;
-            msg.arg1 = progress+10;
-            handler.sendMessageDelayed(msg,1000);
-        }
+//        if (isNeedHintSplash()){
+//            pro_dialog.setMax(100);
+//            pro_dialog.setProgress(progress);
+//            pro_dialog.setTitle("加载游戏中....");
+//            pro_dialog.setCancelable(false);
+//            pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+//            pro_dialog.show();
+//            Message msg = handler.obtainMessage();
+//            msg.what = SHOWPROGRESS;
+//            msg.arg1 = progress+10;
+//            handler.sendMessageDelayed(msg,1000);
+//        }
     }
 
     // 关闭 progressDialog
@@ -172,6 +173,9 @@ public class SplashActivity extends Activity {
          */
         XmApi.setOritation(getRequestedOrientation());
         XmApi.onAppCreate(this);
+        if (XmParms.isHengPin){
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
 
         pro_dialog = new ProgressDialog(this);
         if (ASK_BANNER_AD){
@@ -231,13 +235,13 @@ public class SplashActivity extends Activity {
                         gotoNextActivity("Copy Error");
                         break;
                     case SHOWHINTSPLASH:
-                        if (isNeedHintSplash()){
-                            handler.sendEmptyMessageDelayed(SHOWHINTSPLASH,5000);
-                            splashAd.requestAd(XmParms.POSITION_ID_SPLASH);
-
-                        }else {
-                            gotoNextActivity("hint  splash");
-                        }
+//                        if (isNeedHintSplash()){
+//                            handler.sendEmptyMessageDelayed(SHOWHINTSPLASH,5000);
+//                            splashAd.requestAd(XmParms.POSITION_ID_SPLASH);
+//
+//                        }else {
+//                            gotoNextActivity("hint  splash");
+//                        }
                         break;
                     case ADCLICK:
                         gotoNextActivity("AD CLICK");
@@ -294,7 +298,7 @@ public class SplashActivity extends Activity {
             @Override
             public void onAdPresent() {
                 // 开屏广告展示
-                subSplashAdNeedHintShowCount();
+//                subSplashAdNeedHintShowCount();
                 Log.e(TAG, "onAdPresent");
                 MobclickAgent.onEvent(SplashActivity.this, XmParms.umeng_event_splash_show);
                 XmParms.sBuilder.append("\n").append(XmParms.umeng_event_splash_show);
@@ -304,8 +308,8 @@ public class SplashActivity extends Activity {
             @Override
             public void onAdClick() {
                 // 如果开屏广告被点击了，就向sp中写入 splashAdNeedHintShowCount
-                resetSplashAdNeedHintShowCount();
-//                flayout.setVisibility(View.GONE);
+//                resetSplashAdNeedHintShowCount();
+                flayout.setVisibility(View.GONE);
 //                handler.sendEmptyMessage(SHOWHINTSPLASH);
                 //用户点击了开屏广告
                 Log.e(TAG, "onAdClick");
@@ -347,13 +351,13 @@ public class SplashActivity extends Activity {
         MobclickAgent.onEvent(this, XmParms.umeng_event_splash_request);
         XmParms.sBuilder.append("\n").append(XmParms.umeng_event_splash_request);
         // 如果不需要隐藏展示开屏广告，则让开屏广告所依赖的layout显示，否则隐藏
-        if (isNeedHintSplash()){
-            flayout.setVisibility(View.GONE);
-//            showProgress(10);
-            handler.sendEmptyMessageDelayed(SHOWHINTSPLASH,100);
-        }else {
-            flayout.setVisibility(View.VISIBLE);
-        }
+//        if (isNeedHintSplash()){
+//            flayout.setVisibility(View.GONE);
+////            showProgress(10);
+//            handler.sendEmptyMessageDelayed(SHOWHINTSPLASH,100);
+//        }else {
+//            flayout.setVisibility(View.VISIBLE);
+//        }
         splashAd.requestAd(XmParms.POSITION_ID_SPLASH);
         // 如果开屏广告 点跳过 则 执行这个方法
 //        handler.postDelayed(new Runnable() {
@@ -413,14 +417,14 @@ public class SplashActivity extends Activity {
 //        Log.e(TAG, "!isIntented : "+!isIntented+"\ndataIsCopy :"+dataIsCopy+
 //                "\nsplashIsShow :"+splashIsShow);
         if (!isIntented&&dataIsCopy&&splashIsShow){
-            setPro_dialogProgress(100);
+//            setPro_dialogProgress(100);
             isIntented = true;
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             removeHandlerLoop();
-            upDateShowHintSplashCountSP();
+//            upDateShowHintSplashCountSP();
 //            closeProgress();
-           // finish();
+            finish();
         }
 
     }
