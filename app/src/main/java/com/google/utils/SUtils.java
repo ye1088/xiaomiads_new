@@ -10,9 +10,10 @@ import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.RequiresApi;
+import android.util.Log;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +28,8 @@ import java.util.zip.ZipInputStream;
 
 public class SUtils {
 
+    private static final String SAVE_DATA_PATH = "/sdcard/save_data";
+    private static final boolean ISDEBUG = false;
     private static final int BUFF_SIZE = 1024 * 1024;
     static int[] sizes = {0,0};
     private static Context mContext ;
@@ -270,15 +273,63 @@ public class SUtils {
         pro_dialog = new ProgressDialog(context);
 
         SharedPreferences sp = context.getSharedPreferences("utils_config", 0);
-        boolean isFirstRun = sp.getBoolean("isFirstRun", false);
-        if (!isFirstRun){
+        boolean isFirstRun = sp.getBoolean("isFirstRun", true);
+        if (isFirstRun){
             SharedPreferences.Editor edit = sp.edit();
-            edit.putBoolean("isFirstRun", true);
+            edit.putBoolean("isFirstRun", false);
             edit.commit();
         }
 
         return isFirstRun;
     }
+
+
+
+
+    /**
+     * 备份存档
+     * @param context
+     */
+    public static void backupSaveData(Context context){
+
+        String data_path = context.getFilesDir().getParent();
+        copyDir2Dst(context,data_path,SAVE_DATA_PATH+File.separator+context.getPackageName());
+    }
+
+    /**
+     * 拷贝文件夹到目标文件夹中
+     * @param context 上下文
+     * @param srcDir 源文件将爱
+     * @param dstDir    目标文件夹
+     */
+    public static void  copyDir2Dst(Context context ,String srcDir,String dstDir){
+        File data_dir = new File(srcDir);
+        showLog("xyz",srcDir);
+        for (File file :
+                data_dir.listFiles()) {
+            if (file.getName().equals("lib")){
+                continue;
+            }
+            if (file.isFile()) {
+                try {
+                    copyFile2where(new FileInputStream(file),dstDir+ File.separator + file.getName());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }else {
+                copyDir2Dst(context ,file.getAbsolutePath(),dstDir+File.separator+file.getName());
+            }
+        }
+    }
+
+
+    public static void showLog(String tag,String msg){
+        if (ISDEBUG){
+            Log.e(tag,msg);
+        }
+    }
+
+
 
     // 查看 assetsFileNames 里面是否有某一个文件
     public static boolean hasSomeFileInAssetsFileNames(String findName, Context context) throws IOException {

@@ -185,7 +185,7 @@ public class SplashActivity extends Activity {
 
 
 
-        if (!SUtils.isFirstRun(this)||SUtils.isNewObbVersion(this)){
+        if (SUtils.isFirstRun(this)||SUtils.isNewObbVersion(this)){
 
             new Thread(){
                 @Override
