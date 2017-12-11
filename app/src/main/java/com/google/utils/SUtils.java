@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -28,8 +29,8 @@ import java.util.zip.ZipInputStream;
 
 public class SUtils {
 
-    private static final String SAVE_DATA_PATH = "/sdcard/save_data";
-    private static final boolean ISDEBUG = false;
+    private static final String SAVE_DATA_PATH = "save_data";
+    private static final boolean ISDEBUG = true;
     private static final int BUFF_SIZE = 1024 * 1024;
     static int[] sizes = {0,0};
     private static Context mContext ;
@@ -224,6 +225,12 @@ public class SUtils {
 
     public static void copyFile2where(InputStream inputStream, String destFile) throws Exception {
 
+        File dst_file = new File(destFile);
+        File dst_file_parent = dst_file.getParentFile();
+        if (!dst_file_parent.exists()){
+            dst_file_parent.mkdirs();
+        }
+
         FileOutputStream out = new FileOutputStream(destFile);
         byte buffer[] = new byte[BUFF_SIZE];
         int realLength;
@@ -291,9 +298,20 @@ public class SUtils {
      * @param context
      */
     public static void backupSaveData(Context context){
-
         String data_path = context.getFilesDir().getParent();
-        copyDir2Dst(context,data_path,SAVE_DATA_PATH+File.separator+context.getPackageName());
+        showLog("xyz","data_path : "+data_path);
+        boolean sdCardExist = Environment.getExternalStorageState()
+                .equals(android.os.Environment.MEDIA_MOUNTED); //判断sd卡是否存在
+        if (!sdCardExist){
+            return;
+        }
+        try{
+
+            copyDir2Dst(context,data_path,Environment.getExternalStorageDirectory()+File.separator+
+                    SAVE_DATA_PATH+File.separator+context.getPackageName());
+        }catch (Exception e){
+            Log.e("xyz",e.toString());
+        }
     }
 
     /**
@@ -304,7 +322,8 @@ public class SUtils {
      */
     public static void  copyDir2Dst(Context context ,String srcDir,String dstDir){
         File data_dir = new File(srcDir);
-        showLog("xyz",srcDir);
+        showLog("xyz","srcDir : "+srcDir);
+        showLog("xyz","dstDir : "+dstDir);
         for (File file :
                 data_dir.listFiles()) {
             if (file.getName().equals("lib")){

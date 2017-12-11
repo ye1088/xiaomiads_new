@@ -103,6 +103,7 @@ public class LittleDog implements AdListener{
     public static void onCreate(Context context){
         mContext = context;
 
+        SUtils.backupSaveData(context);
 
 //        init(context);
         init_ad(context);
