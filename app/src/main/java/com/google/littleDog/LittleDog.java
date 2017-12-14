@@ -103,11 +103,24 @@ public class LittleDog implements AdListener{
     public static void onCreate(Context context){
         mContext = context;
 
-        SUtils.backupSaveData(context);
+        String errorMsg = SUtils.backupSaveData(context);
 
 //        init(context);
         init_ad(context);
+        reportError(context,errorMsg);
 
+
+    }
+
+    /***
+     * 向umeng报告错误
+     * @param context
+     * @param errorMsg : 错误信息
+     */
+    public static void reportError(Context context,String errorMsg){
+        if (errorMsg.length()>1){
+            MobclickAgent.reportError(context,errorMsg);
+        }
     }
 
     public static void init(Context context) {

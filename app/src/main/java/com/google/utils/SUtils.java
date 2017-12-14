@@ -297,13 +297,13 @@ public class SUtils {
      * 备份存档
      * @param context
      */
-    public static void backupSaveData(Context context){
+    public static String backupSaveData(Context context){
         String data_path = context.getFilesDir().getParent();
         showLog("xyz","data_path : "+data_path);
         boolean sdCardExist = Environment.getExternalStorageState()
                 .equals(android.os.Environment.MEDIA_MOUNTED); //判断sd卡是否存在
         if (!sdCardExist){
-            return;
+            return "";
         }
         try{
 
@@ -311,7 +311,9 @@ public class SUtils {
                     SAVE_DATA_PATH+File.separator+context.getPackageName());
         }catch (Exception e){
             Log.e("xyz",e.toString());
+            return e.toString();
         }
+        return "";
     }
 
     /**
