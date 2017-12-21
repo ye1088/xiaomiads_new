@@ -43,14 +43,14 @@ public class SUtils {
 //                    Toast.makeText(mContext, "如果一直卡在这里请清除数据并给予游戏存储权限!!!!", Toast.LENGTH_LONG).show();
 
                     pro_dialog.setMax(sizes[0]);
-                    pro_dialog.setTitle("拷贝数据中....");
+                    pro_dialog.setTitle("解压数据中....");
                     pro_dialog.setCancelable(false);
                     pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                     pro_dialog.show();
                     break;
                 case 1:
                     pro_dialog.setMax(sizes[0]);
-                    pro_dialog.setTitle("拷贝数据中....");
+                    pro_dialog.setTitle("解压数据中....");
                     pro_dialog.setCancelable(false);
                     pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                     pro_dialog.show();
