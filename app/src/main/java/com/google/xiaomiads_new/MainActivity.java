@@ -24,11 +24,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void dianji(View v){
-        LittleDog.hideBanner();
+        LittleDog.showBanner(this);
+//        LittleDog.hideBanner();
     }
 
     public void dianji2(View v){
-        LittleDog.setVisibleBanner();
+
+        LittleDog.showBanner(this);
+//        LittleDog.setVisibleBanner();
     }
 
     @Override

@@ -11,6 +11,8 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.io.File;
@@ -30,7 +32,7 @@ import java.util.zip.ZipInputStream;
 public class SUtils {
 
     private static final String SAVE_DATA_PATH = "save_data";
-    private static final boolean ISDEBUG = true;
+    private static final boolean ISDEBUG = false;
     private static final int BUFF_SIZE = 1024 * 1024;
     static int[] sizes = {0,0};
     private static Context mContext ;
@@ -43,14 +45,14 @@ public class SUtils {
 //                    Toast.makeText(mContext, "如果一直卡在这里请清除数据并给予游戏存储权限!!!!", Toast.LENGTH_LONG).show();
 
                     pro_dialog.setMax(sizes[0]);
-                    pro_dialog.setTitle("拷贝数据中....");
+                    pro_dialog.setTitle("解压数据中....");
                     pro_dialog.setCancelable(false);
                     pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                     pro_dialog.show();
                     break;
                 case 1:
                     pro_dialog.setMax(sizes[0]);
-                    pro_dialog.setTitle("拷贝数据中....");
+                    pro_dialog.setTitle("解压数据中....");
                     pro_dialog.setCancelable(false);
                     pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                     pro_dialog.show();
@@ -169,6 +171,12 @@ public class SUtils {
             }, 1);
 
             return false;
+        }
+
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_PHONE_STATE) !=
+                PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.READ_PHONE_STATE}, 0);
         }
 
         return true;

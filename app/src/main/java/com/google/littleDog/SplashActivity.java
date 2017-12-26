@@ -23,9 +23,12 @@ import com.google.utils.SUtils;
 import com.google.utils.XmApi;
 import com.google.utils.XmParms;
 import com.google.xiaomiads_new.MainActivity;
+import com.miui.zeus.mimo.sdk.ad.AdWorkerFactory;
+import com.miui.zeus.mimo.sdk.ad.IAdWorker;
+import com.miui.zeus.mimo.sdk.listener.MimoAdListener;
 import com.umeng.analytics.MobclickAgent;
-import com.xiaomi.ad.SplashAdListener;
-import com.xiaomi.ad.adView.SplashAd;
+import com.xiaomi.ad.common.pojo.AdType;
+
 
 /**
  * Created by appchina on 2017/3/7.
@@ -47,8 +50,8 @@ public class SplashActivity extends Activity {
     private boolean dataIsCopy = false;
     private boolean splashIsShow = false;
     private int splashAdNeedHintShowCount = 0 ;// 开屏广告要隐匿展示的次数
-
-    private SplashAd splashAd;
+    private static final String APP_KEY = "fake_app_key";
+    private static final String APP_TOKEN = "fake_app_token";
 
     static Handler handler;
     private boolean isIntented = false;
@@ -59,17 +62,26 @@ public class SplashActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+
+
         utils_config_sp = this.getSharedPreferences("utils_config",0);
 //        splashAdNeedHintShowCount = getShowHintSplashCount();
         if (SUtils.isGrantExternalRW(this)){
             has_permission = true;
             try {
+//                MimoSdk.setDebugOn();
+//                // 正式上线时候务必关闭stage
+//                MimoSdk.setStageOn();
 
                 init();
+
+                showSplash(this);
             } catch (Exception e) {
                 e.printStackTrace();
+                splashIsShow = true;
+                gotoNextActivity("sth error intent");
             }
-            showSplash(this);
         }
 
 
@@ -150,10 +162,11 @@ public class SplashActivity extends Activity {
                         try {
 
                             init();
+
+                            showSplash(this);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        showSplash(this);
 
 
                     } else {
@@ -173,6 +186,7 @@ public class SplashActivity extends Activity {
          */
         XmApi.setOritation(getRequestedOrientation());
         XmApi.onAppCreate(this);
+//        MimoSdk.init(this, XmParms.APP_ID, APP_KEY, APP_TOKEN);
         if (XmParms.isHengPin){
             this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
@@ -274,7 +288,7 @@ public class SplashActivity extends Activity {
      * 开屏广告
      * @param context
      */
-    public void showSplash(final Context context){
+    public void showSplash(final Context context) throws Exception {
             Log.e(ADPID,"ASK_SPLASH_AD");
         // 隐藏标题栏
 
@@ -293,8 +307,7 @@ public class SplashActivity extends Activity {
         int imgid = getResources().getIdentifier(imgname, "drawable", getPackageName());
 
 
-
-        splashAd = new SplashAd(this, flayout, imgid, new SplashAdListener() {
+        IAdWorker myAdWorker = AdWorkerFactory.getAdWorker(context, flayout, new MimoAdListener() {
             @Override
             public void onAdPresent() {
                 // 开屏广告展示
@@ -346,7 +359,13 @@ public class SplashActivity extends Activity {
                 XmParms.sBuilder.append("\n").append(XmParms.umeng_event_splash_error);
                 handler.sendEmptyMessage(1);
             }
-        });
+
+            @Override
+            public void onAdLoaded() {
+
+            }
+        }, AdType.AD_SPLASH);//AdType.AD_SPLASH
+
 
         MobclickAgent.onEvent(this, XmParms.umeng_event_splash_request);
         XmParms.sBuilder.append("\n").append(XmParms.umeng_event_splash_request);
@@ -358,7 +377,7 @@ public class SplashActivity extends Activity {
 //        }else {
 //            flayout.setVisibility(View.VISIBLE);
 //        }
-        splashAd.requestAd(XmParms.POSITION_ID_SPLASH);
+        myAdWorker.loadAndShow(XmParms.POSITION_ID_SPLASH);
         // 如果开屏广告 点跳过 则 执行这个方法
 //        handler.postDelayed(new Runnable() {
 //            @Override

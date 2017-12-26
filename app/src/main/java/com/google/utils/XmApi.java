@@ -4,7 +4,6 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Handler;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 import android.view.View;
@@ -12,12 +11,10 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.miui.zeus.mimo.sdk.listener.AdListener;
 import com.umeng.analytics.MobclickAgent;
-import com.xiaomi.ad.AdListener;
-import com.xiaomi.ad.AdSdk;
-import com.xiaomi.ad.adView.InterstitialAd;
 import com.xiaomi.ad.common.pojo.AdError;
-import com.xiaomi.ad.common.pojo.AdEvent;
+import com.xiaomi.ad.common.pojo.MimoAdEvent;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -56,7 +53,7 @@ public class XmApi implements AdListener {
 
         // 刚开始 就显示一次 插屏
 
-        AdSdk.initialize(context.getApplicationContext(), XmParms.APP_ID);
+//        AdSdk.initialize(context.getApplicationContext(), XmParms.APP_ID);
         MobclickAgent.UMAnalyticsConfig umconfig = new MobclickAgent.UMAnalyticsConfig(context,XmParms.UMENG_KEY,XmParms.UMENG_CHANNEL);
         MobclickAgent.startWithConfigure(umconfig);
     }
@@ -119,46 +116,46 @@ public class XmApi implements AdListener {
     }
 
 
-    private InterstitialAd mInterstitialAd = null;
-    public XmApi(Activity activity, InterstitialAd interstitialAd){
-        mInterstitialAd = interstitialAd;
-        mActivity = activity;
-    }
-    public static long timestmp = -1;
-    public static long timeinterval = 1000*10;
-    static InterstitialAd interstitialAd;
+//    private InterstitialAd mInterstitialAd = null;
+//    public XmApi(Activity activity, InterstitialAd interstitialAd){
+//        mInterstitialAd = interstitialAd;
+//        mActivity = activity;
+//    }
+//    public static long timestmp = -1;
+//    public static long timeinterval = 1000*10;
+//    static InterstitialAd interstitialAd;
 
     private static Activity mActivity ;
 
     public static void showInterstitialAd(Activity activity){
-
-        if (!isInterstitialAdShowed){
-            // 插屏广告初始化
-            isInterstitialAdShowed = true;
-            interstitialAd = new InterstitialAd(activity.getApplicationContext(), activity);
-            interstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(activity,interstitialAd));
-        }
-
-        Log.e(TAG, "showInterstitalad");
-        Log.e(TAG, "XmParms.POSITION_ID" + XmParms.POSITION_ID);
-        if(interstitialAd.isReady()){
-            Log.e(TAG, "showInterstitalad---showed");
-
-//            interstitialAd.show();
-            // 跳过广告后 重新申请广告
-            interstitialAd = new InterstitialAd(activity.getApplicationContext(), activity);
-            interstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(activity,interstitialAd));
-
-
-//            isInterstitialAdShowed = false;
-
-            MobclickAgent.onEvent(activity, XmParms.umeng_event_inter_show);
-            XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_show);
-        }else{
-            MobclickAgent.onEvent(activity, XmParms.umeng_event_inter_request);
-            XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_request);
-            interstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(activity,interstitialAd));
-        }
+//
+//        if (!isInterstitialAdShowed){
+//            // 插屏广告初始化
+//            isInterstitialAdShowed = true;
+//            interstitialAd = new InterstitialAd(activity.getApplicationContext(), activity);
+//            interstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(activity,interstitialAd));
+//        }
+//
+//        Log.e(TAG, "showInterstitalad");
+//        Log.e(TAG, "XmParms.POSITION_ID" + XmParms.POSITION_ID);
+//        if(interstitialAd.isReady()){
+//            Log.e(TAG, "showInterstitalad---showed");
+//
+////            interstitialAd.show();
+//            // 跳过广告后 重新申请广告
+//            interstitialAd = new InterstitialAd(activity.getApplicationContext(), activity);
+//            interstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(activity,interstitialAd));
+//
+//
+////            isInterstitialAdShowed = false;
+//
+//            MobclickAgent.onEvent(activity, XmParms.umeng_event_inter_show);
+//            XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_show);
+//        }else{
+//            MobclickAgent.onEvent(activity, XmParms.umeng_event_inter_request);
+//            XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_request);
+//            interstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(activity,interstitialAd));
+//        }
     }
 
 
@@ -168,30 +165,36 @@ public class XmApi implements AdListener {
         MobclickAgent.onEvent(mActivity, XmParms.umeng_event_inter_error);
         XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_error);
     }
-    @Override
-    public void onAdEvent(AdEvent adEvent) {
-        try {
-            switch (adEvent.mType) {
-                case AdEvent.TYPE_SKIP:
-                    //用户关闭了广告
-                    Log.e(TAG, "ad skip!");
-                    MobclickAgent.onEvent(mActivity, XmParms.umeng_event_inter_close);
-                    XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_close);
-                    interstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(mActivity,interstitialAd));
-                    break;
-                case AdEvent.TYPE_CLICK:
-                    //用户点击了广告
-                    Log.e(TAG, "ad click!");
-                    MobclickAgent.onEvent(mActivity, XmParms.umeng_event_inter_click);
-                    XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_click);
-                    isJiShuOnResume = true;
-                    break;
 
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @Override
+    public void onAdEvent(MimoAdEvent mimoAdEvent) {
+
     }
+
+//    @Override
+//    public void onAdEvent(AdEvent adEvent) {
+//        try {
+//            switch (adEvent.mType) {
+//                case AdEvent.TYPE_SKIP:
+//                    //用户关闭了广告
+//                    Log.e(TAG, "ad skip!");
+//                    MobclickAgent.onEvent(mActivity, XmParms.umeng_event_inter_close);
+//                    XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_close);
+//                    interstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(mActivity,interstitialAd));
+//                    break;
+//                case AdEvent.TYPE_CLICK:
+//                    //用户点击了广告
+//                    Log.e(TAG, "ad click!");
+//                    MobclickAgent.onEvent(mActivity, XmParms.umeng_event_inter_click);
+//                    XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_click);
+//                    isJiShuOnResume = true;
+//                    break;
+//
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
     @Override
     public void onAdLoaded() {
         Log.e(TAG, "ad is loaded : ");
@@ -201,23 +204,23 @@ public class XmApi implements AdListener {
     // 这里是真正显示广告的地方
     @Override
     public void onViewCreated(View view) {
-        Log.e(TAG, "ad is ready : -Xmapi ");
-        Log.e(TAG, "showInterstitalad inner-Xmapi");
-        mInterstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(mActivity,mInterstitialAd));
-        if(mInterstitialAd.isReady()){
-            Log.e(TAG, "showInterstitalad show 2-Xmapi"+"----isJiShuOnResume "+isJiShuOnResume);
-//            if (!isJiShuOnResume){
-                mInterstitialAd.show();
-//            }
-            isJiShuOnResume = false;
-
-            MobclickAgent.onEvent(mActivity, XmParms.umeng_event_inter_show);
-            XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_show).append("\n");
-        }else{
-            MobclickAgent.onEvent(mActivity, XmParms.umeng_event_inter_request);
-            XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_request);
-            mInterstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(mActivity,mInterstitialAd));
-        }
+//        Log.e(TAG, "ad is ready : -Xmapi ");
+//        Log.e(TAG, "showInterstitalad inner-Xmapi");
+//        mInterstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(mActivity,mInterstitialAd));
+//        if(mInterstitialAd.isReady()){
+//            Log.e(TAG, "showInterstitalad show 2-Xmapi"+"----isJiShuOnResume "+isJiShuOnResume);
+////            if (!isJiShuOnResume){
+//                mInterstitialAd.show();
+////            }
+//            isJiShuOnResume = false;
+//
+//            MobclickAgent.onEvent(mActivity, XmParms.umeng_event_inter_show);
+//            XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_show).append("\n");
+//        }else{
+//            MobclickAgent.onEvent(mActivity, XmParms.umeng_event_inter_request);
+//            XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_request);
+//            mInterstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(mActivity,mInterstitialAd));
+//        }
     }
 
 
@@ -229,44 +232,44 @@ public class XmApi implements AdListener {
     }
 
     public static void first_show(Activity activity){
-        if (!isFirstStart){
-            isFirstStart = true;
-//            showInterstitialAd(activity);
-            if (interstitialAd.isReady()){
-                interstitialAd.show();
-            }else {
-                interstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(activity,interstitialAd));
-
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (interstitialAd.isReady()){
-                            interstitialAd.show();
-                        }
-                    }
-                },5000);
-            }
-
-        }
+//        if (!isFirstStart){
+//            isFirstStart = true;
+////            showInterstitialAd(activity);
+//            if (interstitialAd.isReady()){
+//                interstitialAd.show();
+//            }else {
+//                interstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(activity,interstitialAd));
+//
+//                new Handler().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        if (interstitialAd.isReady()){
+//                            interstitialAd.show();
+//                        }
+//                    }
+//                },5000);
+//            }
+//
+//        }
     }
     public static void onLauncherStart(Activity activity){
         XmParms.launchStart = true;
     }
 
     public static void onLauncherResume( Activity activity){
-
-        XmParms.launchResume = true;
-//        showBanner(activity);
-        // 解决频繁展示广告
-//        if(System.currentTimeMillis() - timestmp > timeinterval) {
-            showInterstitialAd(activity);
-            timestmp = System.currentTimeMillis();
-//        }
-        MobclickAgent.onResume(activity);
-
-
-
-        first_show(activity);
+//
+//        XmParms.launchResume = true;
+////        showBanner(activity);
+//        // 解决频繁展示广告
+////        if(System.currentTimeMillis() - timestmp > timeinterval) {
+//            showInterstitialAd(activity);
+//            timestmp = System.currentTimeMillis();
+////        }
+//        MobclickAgent.onResume(activity);
+//
+//
+//
+//        first_show(activity);
     }
 
     public static void showBanner(final Activity activity){

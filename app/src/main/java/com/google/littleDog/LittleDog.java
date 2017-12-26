@@ -16,24 +16,19 @@ import android.widget.ImageView;
 import com.google.utils.SUtils;
 import com.google.utils.XmApi;
 import com.google.utils.XmParms;
+import com.miui.zeus.mimo.sdk.ad.AdWorkerFactory;
+import com.miui.zeus.mimo.sdk.ad.IAdWorker;
+import com.miui.zeus.mimo.sdk.listener.MimoAdListener;
 import com.umeng.analytics.MobclickAgent;
-import com.xiaomi.ad.AdListener;
-import com.xiaomi.ad.SplashAdListener;
-import com.xiaomi.ad.adView.BannerAd;
-import com.xiaomi.ad.adView.InterstitialAd;
-import com.xiaomi.ad.adView.SplashAd;
-import com.xiaomi.ad.common.pojo.AdError;
-import com.xiaomi.ad.common.pojo.AdEvent;
+import com.xiaomi.ad.common.pojo.AdType;
 
 import java.io.IOException;
-
-import static com.google.littleDog.SplashActivity.ADPID;
 
 /**
  * Created by appchina on 2017/2/21.
  */
 
-public class LittleDog implements AdListener{
+public class LittleDog implements MimoAdListener {
 
     static final boolean ASK_SPLASH_AD = true; //  是否要有开屏广告
     static final boolean ASK_INTER_AD = true;   // 是否要有插屏广告
@@ -47,7 +42,7 @@ public class LittleDog implements AdListener{
 
 
     private static Context mContext;
-    static InterstitialAd interstitialAd;
+    static IAdWorker interstitialAd;
 
     private static final int SHOW_BANNER = 1;
     private static final int HINTSPLASH = 2;    // 显示隐藏性的开屏广告
@@ -102,6 +97,9 @@ public class LittleDog implements AdListener{
 
     public static void onCreate(Context context){
         mContext = context;
+//        MimoSdk.setDebugOn();
+//        // 正式上线时候务必关闭stage
+//        MimoSdk.setStageOn();
 
         String errorMsg = SUtils.backupSaveData(context);
 
@@ -141,7 +139,7 @@ public class LittleDog implements AdListener{
 //    static FrameLayout btn_frameLayout;
 
     //    static FrameLayout.LayoutParams tvlayout;
-    static BannerAd h5BannerAd;
+    static IAdWorker h5BannerAd;
     static FrameLayout flayout;
     static ImageView button;
     private static void bannerLayout(final Activity activity){
@@ -265,42 +263,51 @@ public class LittleDog implements AdListener{
         windowManager.addView(flayout, params);
         hideBanner();
 //        ViewGroup container = (ViewGroup) activity.findViewById(R.id.container);
-        h5BannerAd = new BannerAd(activity, ban_frameLayout, new BannerAd.BannerListener() {
+        try {
+            h5BannerAd = AdWorkerFactory.getAdWorker(activity,
+                    ban_frameLayout, new MimoAdListener() {
+                        @Override
+                        public void onAdPresent() {
+                            Log.d(TAG, "ad has been showed!,这个是轮播事件");
+                            isBannerShowed = true;
+                            // banner广告加载成功后才 显示关闭按钮
+                            controlCloseButton(true);
+                            if (canShowBanner){
+                                canShowBanner = false;
+                                setVisibleBanner();
+                            }
+                        }
+
+                        @Override
+                        public void onAdClick() {
+                            Log.d(TAG, "ad has been clicked!");
+                            hideBanner();
+                        }
+
+                        @Override
+                        public void onAdDismissed() {
+                            Log.d(TAG, "banner onAdDismissed : ");
+                        }
+
+                        @Override
+                        public void onAdFailed(String s) {
+                            Log.d(TAG, "banner failed : "+s);
+                        }
+
+                        @Override
+                        public void onAdLoaded() {
+//                            canShowBanner = true;
+                            isBannerShowed = true;
+                            Log.d(TAG, "banner onAdLoaded : ");
+                        }
+                    },
+                    AdType.AD_BANNER);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "banner error  : ");
+        }
 
 
-            @Override
-            public void onAdEvent(AdEvent adEvent) {
-                Log.d(TAG, "onAdEvent : "+ adEvent);
-                if (adEvent.mType == AdEvent.TYPE_CLICK) {
-                    Log.d(TAG, "ad has been clicked!");
-                    hideBanner();
-                } else if (adEvent.mType == AdEvent.TYPE_SKIP) {
-                    Log.d(TAG, "x button has been clicked!");
-                } else if (adEvent.mType == AdEvent.TYPE_LOAD){
-
-                }else if (adEvent.mType == AdEvent.TYPE_VIEW) {
-                    Log.d(TAG, "ad has been showed!,这个是轮播事件");
-                    isBannerShowed = true;
-                    // banner广告加载成功后才 显示关闭按钮
-                    controlCloseButton(true);
-                    if (canShowBanner){
-                        canShowBanner = false;
-                        setVisibleBanner();
-                    }
-
-                }else if (adEvent.mType == AdEvent.TYPE_INTERRUPT){
-                    Log.d(TAG, "AdEvent.TYPE_INTERRUPT : "+AdEvent.TYPE_INTERRUPT);
-                }else if (adEvent.mType == AdEvent.TYPE_LOAD_FAIL){
-                    Log.d(TAG, "AdEvent.TYPE_LOAD_FAIL : "+AdEvent.TYPE_LOAD_FAIL);
-                }else if (adEvent.mType == AdEvent.TYPE_APP_LAUNCH_FAIL){
-                    Log.d(TAG, "AdEvent.TYPE_APP_LAUNCH_FAIL : "+AdEvent.TYPE_APP_LAUNCH_FAIL);
-                }else {
-                    Log.d(TAG, "unknow : "+adEvent.mType);
-                }
-            }
-
-
-        });
     }
     public static void controlCloseButton(boolean close){
         if (button != null){
@@ -316,7 +323,15 @@ public class LittleDog implements AdListener{
     public static void showBanner(final Activity activity){
         isBannerShowed = false;
         Log.d(TAG,"XmParms.BANNER_ID : "+XmParms.BANNER_ID);
-        h5BannerAd.show(XmParms.BANNER_ID);
+        try {
+            // 这个setvisibility  到时候要注释掉,
+            canShowBanner = true;
+
+            flayout.setVisibility(View.VISIBLE);
+            h5BannerAd.loadAndShow(XmParms.BANNER_ID);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -371,6 +386,11 @@ public class LittleDog implements AdListener{
 
 
         flayout.setVisibility(View.VISIBLE);
+        try {
+            h5BannerAd.loadAndShow(XmParms.BANNER_ID);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         // banner 广告自动关闭
         if (XmParms.isBannerAutoHide){
             hideBannerDelay30s();
@@ -404,9 +424,21 @@ public class LittleDog implements AdListener{
         }
 
         if (ASK_INTER_AD) {
-            interstitialAd = new InterstitialAd(context.getApplicationContext(), (Activity) context);
+            try {
+                interstitialAd = AdWorkerFactory.getAdWorker(context,
+                        (ViewGroup) ((Activity) context).getWindow().getDecorView(), new LittleDog(),
+                        AdType.AD_INTERSTITIAL);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
             // 加载广告
-            interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog());
+            try {
+                interstitialAd.load(XmParms.POSITION_ID);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
         }
 
@@ -434,7 +466,11 @@ public class LittleDog implements AdListener{
                 Log.d("LittleDog : ","run");
 
                 if (!isInterShowed){
-                    show_ad(context);
+                    try {
+                        show_ad(context);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
 
@@ -456,7 +492,7 @@ public class LittleDog implements AdListener{
     private static boolean inter_isshowed = true;
     private static boolean inter_isshowed2 = true;
 
-    public static void show_ad(Context context){
+    public static void show_ad(Context context) throws Exception {
 
 
 
@@ -471,69 +507,53 @@ public class LittleDog implements AdListener{
             interstitialAd.show();
             isInterShowed  = true;
         }
-        interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog()) ;
+        interstitialAd.load(XmParms.POSITION_ID) ;
 
 
     }
 
 
+
+
     @Override
-    public void onAdError(AdError adError) {
-        Log.e(TAG, "onAdError : " + adError.toString());
+    public void onAdPresent() {
+
+    }
+
+    @Override
+    public void onAdClick() {
+        //用户点击了广告
+
         isInterShowed = false;
-        MobclickAgent.onEvent(mContext, XmParms.umeng_event_inter_error);
-        XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_error);
+        // 15s 后 显示广告
+        setVisibleBannerDelay15s();
+        Log.e(TAG, "ad click!");
+        MobclickAgent.onEvent(mContext, XmParms.umeng_event_inter_click);
+        XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_click);
     }
+
     @Override
-    public void onAdEvent(AdEvent adEvent) {
-        try {
-            switch (adEvent.mType) {
-                case AdEvent.TYPE_SKIP:
-                    //用户关闭了广告
-                    isInterShowed = false;
-                    setVisibleBannerDelay15s();
-                    Log.e(TAG, "ad skip!");
-                    MobclickAgent.onEvent(mContext, XmParms.umeng_event_inter_close);
-                    XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_close);
-                    break;
-                case AdEvent.TYPE_CLICK:
-                    //用户点击了广告
-
-                    isInterShowed = false;
-                    // 15s 后 显示广告
-                    setVisibleBannerDelay15s();
-                    Log.e(TAG, "ad click!");
-                    MobclickAgent.onEvent(mContext, XmParms.umeng_event_inter_click);
-                    XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_click);
-                    break;
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void onAdDismissed() {
+        isInterShowed = false;
+        setVisibleBannerDelay15s();
+        Log.e(TAG, "onAdDismissed!");
+        MobclickAgent.onEvent(mContext, XmParms.umeng_event_inter_close);
+        XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_close);
     }
+
+    @Override
+    public void onAdFailed(String s) {
+        Log.e(TAG, "onAdError : " + s);
+        isInterShowed = false;
+
+    }
+
     @Override
     public void onAdLoaded() {
         Log.e(TAG, "ad is loaded : ");
 //        interstitialAd.show();
     }
 
-    // 这里是真正显示广告的地方
-    @Override
-    public void onViewCreated(View view) {
-        Log.e(TAG, "ad is ready : -Xmapi ");
-        Log.e(TAG, "showInterstitalad inner-Xmapi");
-        if(interstitialAd.isReady()){
-//            if (!isJiShuOnResume){
-//            }
-
-            MobclickAgent.onEvent(mContext, XmParms.umeng_event_inter_show);
-            XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_show).append("\n");
-        }else{
-            MobclickAgent.onEvent(mContext, XmParms.umeng_event_inter_request);
-            XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_request);
-        }
-    }
 
 
 
@@ -542,7 +562,7 @@ public class LittleDog implements AdListener{
     private static void requestSplashAd(){
 //        ((Activity)mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        splashAd.requestAd(XmParms.POSITION_ID_SPLASH);
+//        splashAd.requestAd(XmParms.POSITION_ID_SPLASH);
 //        ((Activity)mContext).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
@@ -550,64 +570,64 @@ public class LittleDog implements AdListener{
      * 开屏广告
      * @param context
      */
-    private static SplashAd splashAd;
+//    private static SplashAd splashAd;
     public static void showSplash(Activity context){
-        Log.e(ADPID,"ASK_SPLASH_AD");
-
-
-
-        FrameLayout flayout = new FrameLayout(context);
-        flayout.setVisibility(View.GONE);
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-        context.addContentView(flayout,layoutParams);
-//        WindowManager windowManager = (WindowManager) context
-//                .getSystemService(context.WINDOW_SERVICE);
-//        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
-//        windowManager.addView(flayout,layoutParams);
-        String imgname = "default_splash_";
-        int imgid = context.getResources().getIdentifier(imgname, "drawable", context.getPackageName());
-
+//        Log.e(ADPID,"ASK_SPLASH_AD");
+//
+//
+//
+//        FrameLayout flayout = new FrameLayout(context);
 //        flayout.setVisibility(View.GONE);
-
-        splashAd = new SplashAd(context, flayout, imgid, new SplashAdListener() {
-            @Override
-            public void onAdPresent() {
-                // 开屏广告展示
-                Log.e(TAG, "onAdPresent");
-
-            }
-
-            @Override
-            public void onAdClick() {
-                // 如果开屏广告被点击了，就向sp中写入 splashAdNeedHintShowCount
-//                flayout.setVisibility(View.GONE);
-//                handler.sendEmptyMessage(SHOWHINTSPLASH);
-                //用户点击了开屏广告
-                Log.e(TAG, "onAdClick");
-
-//                handler.postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            gotoNextActivity("adclick");
-//                        }
-//                    }, 5000);
-            }
-
-            @Override
-            public void onAdDismissed() {
-                //这个方法被调用时，表示从开屏广告消失。
-                Log.e(TAG, "onAdDismissed");
-
-
-            }
-            @Override
-            public void onAdFailed(String s) {
-
-                Log.e(TAG, "onAdFailed, message: " + s);
-                //这个方法被调用时，表示从服务器端请求开屏广告时，出现错误。
-            }
-        });
+//        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+//                ViewGroup.LayoutParams.MATCH_PARENT);
+//        context.addContentView(flayout,layoutParams);
+////        WindowManager windowManager = (WindowManager) context
+////                .getSystemService(context.WINDOW_SERVICE);
+////        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+////        windowManager.addView(flayout,layoutParams);
+//        String imgname = "default_splash_";
+//        int imgid = context.getResources().getIdentifier(imgname, "drawable", context.getPackageName());
+//
+////        flayout.setVisibility(View.GONE);
+//
+//        splashAd = new SplashAd(context, flayout, imgid, new SplashAdListener() {
+//            @Override
+//            public void onAdPresent() {
+//                // 开屏广告展示
+//                Log.e(TAG, "onAdPresent");
+//
+//            }
+//
+//            @Override
+//            public void onAdClick() {
+//                // 如果开屏广告被点击了，就向sp中写入 splashAdNeedHintShowCount
+////                flayout.setVisibility(View.GONE);
+////                handler.sendEmptyMessage(SHOWHINTSPLASH);
+//                //用户点击了开屏广告
+//                Log.e(TAG, "onAdClick");
+//
+////                handler.postDelayed(new Runnable() {
+////                        @Override
+////                        public void run() {
+////                            gotoNextActivity("adclick");
+////                        }
+////                    }, 5000);
+//            }
+//
+//            @Override
+//            public void onAdDismissed() {
+//                //这个方法被调用时，表示从开屏广告消失。
+//                Log.e(TAG, "onAdDismissed");
+//
+//
+//            }
+//            @Override
+//            public void onAdFailed(String s) {
+//
+//                Log.e(TAG, "onAdFailed, message: " + s);
+//                //这个方法被调用时，表示从服务器端请求开屏广告时，出现错误。
+//            }
+//        });
 
 
         // 如果开屏广告 点跳过 则 执行这个方法
