@@ -387,6 +387,11 @@ public class LittleDog implements AdListener{
         XmApi.setOritation(((Activity)context).getRequestedOrientation());
         XmApi.onAppCreate(context);
 
+        // 展示 ok dialog
+        String dialogMsg = "test";
+        SUtils.showOkDialog((Activity) context,dialogMsg);
+
+
         if (XmParms.needBanner){
             bannerLayout((Activity) context);
             mHandler.postDelayed(new Runnable() {

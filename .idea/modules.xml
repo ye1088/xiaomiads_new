@@ -3,9 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://D:\tools\code\work_code\xiaomiads_new\app\app.iml" filepath="D:\tools\code\work_code\xiaomiads_new\app\app.iml" />
       <module fileurl="file://$PROJECT_DIR$/xiaomiads_new.iml" filepath="$PROJECT_DIR$/xiaomiads_new.iml" />
-      <module fileurl="file://$PROJECT_DIR$/xiaomiads_new.iml" filepath="$PROJECT_DIR$/xiaomiads_new.iml" />
+      <module fileurl="file://D:\tools\code\work_code\xiaomiads_new\xiaomiads_new.iml" filepath="D:\tools\code\work_code\xiaomiads_new\xiaomiads_new.iml" />
     </modules>
   </component>
 </project>

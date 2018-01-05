@@ -2,6 +2,7 @@ package com.google.utils;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -150,6 +151,20 @@ public class SUtils {
         mHandler.sendEmptyMessage(-1);
 
 
+    }
+
+
+
+    public static void showOkDialog(Activity activity,String msg){
+        boolean isOpen = false;
+        if (isOpen){
+            AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
+            dialog.setTitle("提示");
+            dialog.setMessage(msg);
+            dialog.setPositiveButton("OK",null);
+            dialog.setCancelable(false);
+            dialog.create().show();
+        }
     }
 
 
