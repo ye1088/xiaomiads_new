@@ -39,6 +39,9 @@ public class LittleDog implements AdListener{
     static final boolean ASK_INTER_AD = true;   // 是否要有插屏广告
     private static final String TAG =  "xyz";
     private static final int SHOW_BANNER_VISIBLE =  0;
+    private static final int SHOW_BANNER = 1;
+    private static final int HINTSPLASH = 2;    // 显示隐藏性的开屏广告
+    private static final int SHOW_POST_INTERSTITIAL = 3;
     static boolean ASK_BANNER_AD = true;  // banner 广告是不是已经显示了
     static boolean  isFirstExc = true;  // 是否为第一次执行
     private static boolean isOnPause = false;
@@ -49,8 +52,6 @@ public class LittleDog implements AdListener{
     private static Context mContext;
     static InterstitialAd interstitialAd;
 
-    private static final int SHOW_BANNER = 1;
-    private static final int HINTSPLASH = 2;    // 显示隐藏性的开屏广告
     static Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -82,7 +83,11 @@ public class LittleDog implements AdListener{
                     break;
                 case HINTSPLASH:
 //                    requestSplashAd();
+                    mHandler.removeMessages(HINTSPLASH);
                     mHandler.sendEmptyMessageDelayed(HINTSPLASH,60000);
+                    break;
+                case SHOW_POST_INTERSTITIAL:
+                    show_ad();
                     break;
 
             }
@@ -319,11 +324,22 @@ public class LittleDog implements AdListener{
         h5BannerAd.show(XmParms.BANNER_ID);
     }
 
+    public static void postShowBanner(){
+        Message msg = mHandler.obtainMessage();
+        msg.what = SHOW_BANNER_VISIBLE;
+        mHandler.removeMessages(SHOW_BANNER_VISIBLE);
+        mHandler.sendMessage(msg);
+    }
+
 
     public static void hideBanner(){
         if (flayout==null){
             return;
         }
+//        if (!XmParms.isADCover){
+//            mHandler.sendEmptyMessageDelayed(SHOW_BANNER_VISIBLE,360000);
+//        }
+        mHandler.removeMessages(SHOW_BANNER_VISIBLE);
         mHandler.sendEmptyMessageDelayed(SHOW_BANNER_VISIBLE,360000);
         flayout.setVisibility(View.INVISIBLE);
     }
@@ -364,6 +380,7 @@ public class LittleDog implements AdListener{
         Log.d(TAG,"isInterShowed : "+isInterShowed+"  isBannerShowed : "+isBannerShowed);
         if (flayout==null|| isInterShowed ||!isBannerShowed){//
             canShowBanner = true;
+            mHandler.removeMessages(SHOW_BANNER);
             mHandler.sendEmptyMessage(SHOW_BANNER);
 
             return;
@@ -394,18 +411,23 @@ public class LittleDog implements AdListener{
 
         if (XmParms.needBanner){
             bannerLayout((Activity) context);
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    showBanner((Activity) context);
-                    mHandler.sendEmptyMessage(SHOW_BANNER);
-                    setVisibleBanner();
-                }
-            },18000);
-            Message message = mHandler.obtainMessage();
-            message.what = SHOW_BANNER_VISIBLE;
-            // 延迟 6 分钟 再次 让banner 可见
-            mHandler.sendMessageDelayed(message,360000);
+            if (!XmParms.isADCover){// 如果不是替换广告则按原来的老计划搞广告
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        showBanner((Activity) context);
+                        mHandler.removeMessages(SHOW_BANNER);
+                        mHandler.sendEmptyMessage(SHOW_BANNER);
+                        setVisibleBanner();
+                    }
+                },18000);
+                Message message = mHandler.obtainMessage();
+                message.what = SHOW_BANNER_VISIBLE;
+                // 延迟 6 分钟 再次 让banner 可见
+                mHandler.removeMessages(SHOW_BANNER_VISIBLE);
+                mHandler.sendMessageDelayed(message,360000);
+            }
+
         }
 
         if (ASK_INTER_AD) {
@@ -424,13 +446,18 @@ public class LittleDog implements AdListener{
 
 
         isOnPause = false;
+        // 刷开屏广告展示量
 //        requestSplashAd();
-        mHandler.sendEmptyMessage(HINTSPLASH);
+//        mHandler.sendEmptyMessage(HINTSPLASH);
         Log.d("LittleDog : ","onResume");
 //        MobclickAgent.onResume(context);
 
 //        LittleDog.setVisibleBanner();
 
+
+        if (XmParms.isADCover){
+            return;
+        }
 
         // 加载广告
         mHandler.postDelayed(new Runnable() {
@@ -452,7 +479,7 @@ public class LittleDog implements AdListener{
     public static void onPause(Context context){
 
         isOnPause = true;
-        MobclickAgent.onPause(context);
+//        MobclickAgent.onPause(context);
 //        mHandler.removeMessages(SHOW_BANNER_VISIBLE);
         mHandler.removeMessages(HINTSPLASH);
     }
@@ -487,9 +514,14 @@ public class LittleDog implements AdListener{
 
         if (interstitialAd.isReady()){
             mHandler.removeMessages(SHOW_BANNER_VISIBLE);
-            if (!isFirstExc){
-                hideBanner();
-            }else {
+//            if (!isFirstExc){
+//                hideBanner();
+//            }else {
+//                isFirstExc = false;
+//            }
+
+            hideBanner();
+            if (isFirstExc){
                 isFirstExc = false;
             }
 
@@ -499,6 +531,15 @@ public class LittleDog implements AdListener{
         interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog()) ;
 
 
+    }
+
+
+    public static void postShowInterstitial(){
+        Message msg = mHandler.obtainMessage();
+        msg.what = SHOW_POST_INTERSTITIAL;
+
+        mHandler.removeMessages(SHOW_POST_INTERSTITIAL);
+        mHandler.sendMessage(msg);
     }
 
 
@@ -516,7 +557,11 @@ public class LittleDog implements AdListener{
                 case AdEvent.TYPE_SKIP:
                     //用户关闭了广告
                     isInterShowed = false;
-                    setVisibleBannerDelay15s();
+                    // 插屏广告关闭15秒后,显示横幅广告
+                    if (!XmParms.isADCover){
+                        setVisibleBannerDelay15s();
+                    }
+
                     Log.e(TAG, "ad skip!");
                     MobclickAgent.onEvent(mContext, XmParms.umeng_event_inter_close);
                     XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_close);
@@ -526,7 +571,10 @@ public class LittleDog implements AdListener{
 
                     isInterShowed = false;
                     // 15s 后 显示广告
-                    setVisibleBannerDelay15s();
+                    // 插屏广告关闭15秒后,显示横幅广告
+                    if (!XmParms.isADCover){
+                        setVisibleBannerDelay15s();
+                    }
                     Log.e(TAG, "ad click!");
                     MobclickAgent.onEvent(mContext, XmParms.umeng_event_inter_click);
                     XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_click);

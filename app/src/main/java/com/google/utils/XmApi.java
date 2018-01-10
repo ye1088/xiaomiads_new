@@ -92,11 +92,8 @@ public class XmApi implements AdListener {
             if ("0".equals(pro.getProperty("isBannerTop"))) XmParms.isBannerTop = false;
             if ("0".equals(pro.getProperty("isBannerCanClose"))) XmParms.isBannerCanClose = false;
             if ("0".equals(pro.getProperty("isBannerAutoHide"))) XmParms.isBannerAutoHide = false;
-            if ("1".equals(pro.getProperty("isHengPin"))){
-                XmParms.isHengPin = true;
-            } else {
-                XmParms.isHengPin = false;
-            }
+            if ("1".equals(pro.getProperty("isADCover"))) XmParms.isADCover = true;
+            if ("1".equals(pro.getProperty("isHengPin"))) XmParms.isHengPin = true;
 
             if (!XmParms.isHengPin){
                 //竖屏开屏广告id      竖屏广告
