@@ -81,7 +81,7 @@ public class LittleDog implements AdListener{
 
                     break;
                 case HINTSPLASH:
-                    requestSplashAd();
+//                    requestSplashAd();
                     mHandler.sendEmptyMessageDelayed(HINTSPLASH,60000);
                     break;
 
@@ -383,7 +383,7 @@ public class LittleDog implements AdListener{
 
 
 //        initBanner((Activity) context);
-        showSplash((Activity)context);
+//        showSplash((Activity)context);
         XmApi.setOritation(((Activity)context).getRequestedOrientation());
         XmApi.onAppCreate(context);
 
@@ -427,7 +427,7 @@ public class LittleDog implements AdListener{
 //        requestSplashAd();
         mHandler.sendEmptyMessage(HINTSPLASH);
         Log.d("LittleDog : ","onResume");
-        MobclickAgent.onResume(context);
+//        MobclickAgent.onResume(context);
 
 //        LittleDog.setVisibleBanner();
 
@@ -439,7 +439,7 @@ public class LittleDog implements AdListener{
                 Log.d("LittleDog : ","run");
 
                 if (!isInterShowed){
-                    show_ad(context);
+                    show_ad();
                 }
 
 
@@ -462,6 +462,26 @@ public class LittleDog implements AdListener{
     private static boolean inter_isshowed2 = true;
 
     public static void show_ad(Context context){
+
+
+
+        if (interstitialAd.isReady()){
+            mHandler.removeMessages(SHOW_BANNER_VISIBLE);
+            if (!isFirstExc){
+                hideBanner();
+            }else {
+                isFirstExc = false;
+            }
+
+            interstitialAd.show();
+            isInterShowed  = true;
+        }
+        interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog()) ;
+
+
+    }
+
+    public static void show_ad(){
 
 
 
@@ -557,6 +577,8 @@ public class LittleDog implements AdListener{
      */
     private static SplashAd splashAd;
     public static void showSplash(Activity context){
+
+
         Log.e(ADPID,"ASK_SPLASH_AD");
 
 
