@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 
 import com.google.utils.SUtils;
 import com.google.utils.XmApi;
@@ -25,13 +27,16 @@ import com.google.utils.XmParms;
 import com.google.xiaomiads_new.MainActivity;
 import com.umeng.analytics.MobclickAgent;
 import com.xiaomi.ad.SplashAdListener;
+import com.xiaomi.ad.adView.InterstitialAd;
 import com.xiaomi.ad.adView.SplashAd;
+
+import java.io.IOException;
 
 /**
  * Created by appchina on 2017/3/7.
  */
 
-public class SplashActivity extends Activity {
+public class SplashActivity extends Activity   {
 
     static final String ADPID = "1705100002";
     private static final boolean ASK_BANNER_AD = true;
@@ -49,6 +54,7 @@ public class SplashActivity extends Activity {
     private int splashAdNeedHintShowCount = 0 ;// 开屏广告要隐匿展示的次数
 
     private SplashAd splashAd;
+    static InterstitialAd interstitialAd;
 
     static Handler handler;
     private boolean isIntented = false;
@@ -59,6 +65,9 @@ public class SplashActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        interstitialAd = new InterstitialAd(this, this);
+        // 加载广告
+        interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog());
         utils_config_sp = this.getSharedPreferences("utils_config",0);
 //        splashAdNeedHintShowCount = getShowHintSplashCount();
         if (SUtils.isGrantExternalRW(this)){
@@ -278,7 +287,15 @@ public class SplashActivity extends Activity {
      */
     public void showSplash(final Context context){
             Log.e(ADPID,"ASK_SPLASH_AD");
-        // 隐藏标题栏
+        // 设置背景
+        ImageButton img = new ImageButton(this);
+        try {
+            img.setImageBitmap(BitmapFactory.decodeStream(getAssets().open("default_splash_.jpg")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        this.setContentView(img);
+
 
         // 隐藏状态栏
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -438,7 +455,6 @@ public class SplashActivity extends Activity {
             Log.e(TAG,msg);
         }
     }
-
 
 
 }

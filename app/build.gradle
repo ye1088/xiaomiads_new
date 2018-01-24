@@ -29,4 +29,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile files('libs/AdSdk.jar')
     compile files('libs/umeng-analytics-v6.1.2.jar')
+    implementation files('libs/AdSdk.jar')
+    implementation files('libs/umeng-analytics-v6.1.2.jar')
 }

@@ -14,6 +14,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.unity3d.player.UnityPlayer;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -153,6 +155,9 @@ public class SUtils {
 
     }
 
+    public static void sendMsg2Unity(String scence,String methodName,String arg){
+        UnityPlayer.UnitySendMessage(scence,methodName,arg);
+    }
 
 
     public static void showOkDialog(Activity activity,String msg){

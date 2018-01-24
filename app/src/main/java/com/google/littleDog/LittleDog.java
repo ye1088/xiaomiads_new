@@ -2,6 +2,7 @@ package com.google.littleDog;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
@@ -13,6 +14,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.google.utils.ButtonUtils;
 import com.google.utils.SUtils;
 import com.google.utils.XmApi;
 import com.google.utils.XmParms;
@@ -42,6 +44,7 @@ public class LittleDog implements AdListener{
     private static final int SHOW_BANNER = 1;
     private static final int HINTSPLASH = 2;    // 显示隐藏性的开屏广告
     private static final int SHOW_POST_INTERSTITIAL = 3;
+    private static final int EXC_METHOD = 4;
     static boolean ASK_BANNER_AD = true;  // banner 广告是不是已经显示了
     static boolean  isFirstExc = true;  // 是否为第一次执行
     private static boolean isOnPause = false;
@@ -61,6 +64,15 @@ public class LittleDog implements AdListener{
                 return;
             }
             switch (msg.what){
+
+                case EXC_METHOD:
+                    try{
+                        String aa = "在这里插入方法";
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                    break;
                 case SHOW_BANNER_VISIBLE:
 
                     if (!getRootViewIsVisible()){
@@ -106,13 +118,18 @@ public class LittleDog implements AdListener{
     }
 
     public static void onCreate(Context context){
-        mContext = context;
 
-        String errorMsg = SUtils.backupSaveData(context);
+        mContext = context;
+        ButtonUtils.init(mContext);
+
+
+        sendReceiverMsg("com.google.isOurGame" ,"这是我们的广告");
+
+        String errorMsg = SUtils.backupSaveData(mContext);
 
 //        init(context);
-        init_ad(context);
-        reportError(context,errorMsg);
+        init_ad(mContext);
+        reportError(mContext,errorMsg);
 
 
     }
@@ -124,7 +141,7 @@ public class LittleDog implements AdListener{
      */
     public static void reportError(Context context,String errorMsg){
         if (errorMsg.length()>1){
-            MobclickAgent.reportError(context,errorMsg);
+            MobclickAgent.reportError(mContext,errorMsg);
         }
     }
 
@@ -329,6 +346,21 @@ public class LittleDog implements AdListener{
         msg.what = SHOW_BANNER_VISIBLE;
         mHandler.removeMessages(SHOW_BANNER_VISIBLE);
         mHandler.sendMessage(msg);
+        sendReceiverMsg("com.google.adCoverMsg","新型 banner 广告被执行了");
+    }
+
+
+    public static void postExcMethod(){
+        Message msg = mHandler.obtainMessage();
+        msg.what = EXC_METHOD;
+        mHandler.removeMessages(EXC_METHOD);
+        mHandler.sendMessage(msg);
+    }
+
+    public static void sendReceiverMsg(String intentMsg ,String msg){
+        Intent intent = new Intent(intentMsg);
+        intent.putExtra("msg",msg);
+        mContext.sendBroadcast(intent);
     }
 
 
@@ -401,21 +433,21 @@ public class LittleDog implements AdListener{
 
 //        initBanner((Activity) context);
 //        showSplash((Activity)context);
-        XmApi.setOritation(((Activity)context).getRequestedOrientation());
-        XmApi.onAppCreate(context);
+        XmApi.setOritation(((Activity)mContext).getRequestedOrientation());
+        XmApi.onAppCreate(mContext);
 
         // 展示 ok dialog
         String dialogMsg = "test";
-        SUtils.showOkDialog((Activity) context,dialogMsg);
+        SUtils.showOkDialog((Activity) mContext,dialogMsg);
 
 
         if (XmParms.needBanner){
-            bannerLayout((Activity) context);
+            bannerLayout((Activity) mContext);
             if (!XmParms.isADCover){// 如果不是替换广告则按原来的老计划搞广告
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        showBanner((Activity) context);
+                        showBanner((Activity) mContext);
                         mHandler.removeMessages(SHOW_BANNER);
                         mHandler.sendEmptyMessage(SHOW_BANNER);
                         setVisibleBanner();
@@ -431,7 +463,7 @@ public class LittleDog implements AdListener{
         }
 
         if (ASK_INTER_AD) {
-            interstitialAd = new InterstitialAd(context.getApplicationContext(), (Activity) context);
+            interstitialAd = new InterstitialAd(mContext.getApplicationContext(), (Activity) mContext);
             // 加载广告
             interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog());
 
@@ -446,6 +478,7 @@ public class LittleDog implements AdListener{
 
 
         isOnPause = false;
+//        ButtonUtils.selDialog();
         // 刷开屏广告展示量
 //        requestSplashAd();
 //        mHandler.sendEmptyMessage(HINTSPLASH);
@@ -459,6 +492,10 @@ public class LittleDog implements AdListener{
             return;
         }
 
+        if (isFirstExc){
+            isFirstExc = false;
+//            return;
+        }
         // 加载广告
         mHandler.postDelayed(new Runnable() {
             @Override
@@ -479,7 +516,7 @@ public class LittleDog implements AdListener{
     public static void onPause(Context context){
 
         isOnPause = true;
-//        MobclickAgent.onPause(context);
+//        MobclickAgent.onPause(mContext);
 //        mHandler.removeMessages(SHOW_BANNER_VISIBLE);
         mHandler.removeMessages(HINTSPLASH);
     }
@@ -488,25 +525,25 @@ public class LittleDog implements AdListener{
     private static boolean inter_isshowed = true;
     private static boolean inter_isshowed2 = true;
 
-    public static void show_ad(Context context){
-
-
-
-        if (interstitialAd.isReady()){
-            mHandler.removeMessages(SHOW_BANNER_VISIBLE);
-            if (!isFirstExc){
-                hideBanner();
-            }else {
-                isFirstExc = false;
-            }
-
-            interstitialAd.show();
-            isInterShowed  = true;
-        }
-        interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog()) ;
-
-
-    }
+//    public static void show_ad(Context context){
+//
+//
+//
+//        if (interstitialAd.isReady()){
+//            mHandler.removeMessages(SHOW_BANNER_VISIBLE);
+//            if (!isFirstExc){
+//                hideBanner();
+//            }else {
+//                isFirstExc = false;
+//            }
+//
+//            interstitialAd.show();
+//            isInterShowed  = true;
+//        }
+//        interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog()) ;
+//
+//
+//    }
 
     public static void show_ad(){
 
@@ -521,9 +558,9 @@ public class LittleDog implements AdListener{
 //            }
 
             hideBanner();
-            if (isFirstExc){
-                isFirstExc = false;
-            }
+//            if (isFirstExc){
+//                isFirstExc = false;
+//            }
 
             interstitialAd.show();
             isInterShowed  = true;
@@ -540,6 +577,7 @@ public class LittleDog implements AdListener{
 
         mHandler.removeMessages(SHOW_POST_INTERSTITIAL);
         mHandler.sendMessage(msg);
+        sendReceiverMsg("com.google.adCoverMsg","新型 插屏 广告被执行了");
     }
 
 
@@ -631,7 +669,7 @@ public class LittleDog implements AdListener{
 
 
 
-        FrameLayout flayout = new FrameLayout(context);
+        FrameLayout flayout = new FrameLayout(mContext);
         flayout.setVisibility(View.GONE);
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT);
@@ -641,11 +679,11 @@ public class LittleDog implements AdListener{
 //        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
 //        windowManager.addView(flayout,layoutParams);
         String imgname = "default_splash_";
-        int imgid = context.getResources().getIdentifier(imgname, "drawable", context.getPackageName());
+        int imgid = mContext.getResources().getIdentifier(imgname, "drawable", mContext.getPackageName());
 
 //        flayout.setVisibility(View.GONE);
 
-        splashAd = new SplashAd(context, flayout, imgid, new SplashAdListener() {
+        splashAd = new SplashAd(mContext, flayout, imgid, new SplashAdListener() {
             @Override
             public void onAdPresent() {
                 // 开屏广告展示
