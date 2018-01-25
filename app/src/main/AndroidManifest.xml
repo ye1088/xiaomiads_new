@@ -16,7 +16,7 @@
         </activity>
         <!--android:screenOrientation="landscape"-->
         <activity
-
+            android:screenOrientation="portrait"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:name="com.google.littleDog.SplashActivity">
             <intent-filter>

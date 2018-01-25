@@ -3,6 +3,7 @@ package com.google.littleDog;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -181,8 +182,8 @@ public class LittleDog implements MimoAdListener {
 //        params.token = activity.getWindow().getDecorView().getWindowToken();
 //        params.type = WindowManager.LayoutParams.LAST_SUB_WINDOW;
         //设置图片格式，效果为背景透明
-//        params.type = WindowManager.LayoutParams.TYPE_TOAST;
-//        params.format = PixelFormat.RGBA_8888;
+        params.type = WindowManager.LayoutParams.TYPE_TOAST;
+        params.format = PixelFormat.RGBA_8888;
         //设置浮动窗口不可聚焦（实现操作除浮动窗口外的其他可见窗口的操作）
         params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
         params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -287,6 +288,7 @@ public class LittleDog implements MimoAdListener {
                         @Override
                         public void onAdDismissed() {
                             Log.d(TAG, "banner onAdDismissed : ");
+                            hideBanner();
                         }
 
                         @Override
