@@ -179,48 +179,6 @@ public class SplashActivity extends Activity {
 
     private void init() throws Exception {
 
-        /**
-         * 友盟 初始化
-         * cGold : 是渠道号
-         * 584912f375ca3528ff00056d : 是友盟 key
-         */
-        XmApi.setOritation(getRequestedOrientation());
-        XmApi.onAppCreate(this);
-//        MimoSdk.init(this, XmParms.APP_ID, APP_KEY, APP_TOKEN);
-        if (XmParms.isHengPin){
-            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        }
-
-        pro_dialog = new ProgressDialog(this);
-        if (ASK_BANNER_AD){
-//            initBanner(this);
-        }
-
-
-
-
-        if (SUtils.isFirstRun(this)||SUtils.isNewObbVersion(this)){
-
-            new Thread(){
-                @Override
-                public void run() {
-                    super.run();
-                    try {
-                        SUtils.copy_data(SplashActivity.this);
-                        Message msg = handler.obtainMessage();
-                        dataIsCopy = true;
-                        msg.what = 4;
-                        handler.sendMessage(msg);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        dataIsCopy = true;
-                        handler.sendEmptyMessage(5);
-                    }
-                }
-            }.start();
-        }else {
-            dataIsCopy = true;
-        }
 
         handler = new Handler(){
             @Override
@@ -279,6 +237,51 @@ public class SplashActivity extends Activity {
 
             }
         };
+
+
+        /**
+         * 友盟 初始化
+         * cGold : 是渠道号
+         * 584912f375ca3528ff00056d : 是友盟 key
+         */
+        XmApi.setOritation(getRequestedOrientation());
+        XmApi.onAppCreate(this);
+//        MimoSdk.init(this, XmParms.APP_ID, APP_KEY, APP_TOKEN);
+        if (XmParms.isHengPin){
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+
+        pro_dialog = new ProgressDialog(this);
+        if (ASK_BANNER_AD){
+//            initBanner(this);
+        }
+
+
+
+
+        if (SUtils.isFirstRun(this)||SUtils.isNewObbVersion(this)){
+
+            new Thread(){
+                @Override
+                public void run() {
+                    super.run();
+                    try {
+                        SUtils.copy_data(SplashActivity.this);
+                        Message msg = handler.obtainMessage();
+                        dataIsCopy = true;
+                        msg.what = 4;
+                        handler.sendMessage(msg);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        dataIsCopy = true;
+                        handler.sendEmptyMessage(5);
+                    }
+                }
+            }.start();
+        }else {
+            dataIsCopy = true;
+        }
+
 
     }
 
@@ -357,7 +360,7 @@ public class SplashActivity extends Activity {
                 //这个方法被调用时，表示从服务器端请求开屏广告时，出现错误。
                 MobclickAgent.onEvent(SplashActivity.this, XmParms.umeng_event_splash_error);
                 XmParms.sBuilder.append("\n").append(XmParms.umeng_event_splash_error);
-                handler.sendEmptyMessage(1);
+//                handler.sendEmptyMessage(1);
             }
 
             @Override

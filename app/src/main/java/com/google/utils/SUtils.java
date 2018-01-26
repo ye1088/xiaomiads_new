@@ -2,6 +2,7 @@ package com.google.utils;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -11,9 +12,9 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
+
+import com.unity3d.player.UnityPlayer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,7 +33,7 @@ import java.util.zip.ZipInputStream;
 public class SUtils {
 
     private static final String SAVE_DATA_PATH = "save_data";
-    private static final boolean ISDEBUG = false;
+    private static final boolean ISDEBUG = true;
     private static final int BUFF_SIZE = 1024 * 1024;
     static int[] sizes = {0,0};
     private static Context mContext ;
@@ -154,6 +155,24 @@ public class SUtils {
 
     }
 
+    public static void sendMsg2Unity(String scence,String methodName,String arg){
+        UnityPlayer.UnitySendMessage(scence,methodName,arg);
+    }
+
+
+    public static void showOkDialog(Activity activity,String msg){
+        boolean isOpen = false;
+        if (isOpen){
+            AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
+            dialog.setTitle("提示");
+            dialog.setMessage(msg);
+            dialog.setPositiveButton("OK",null);
+            dialog.setCancelable(false);
+            dialog.create().show();
+        }
+    }
+
+
 
 
     /**
@@ -163,20 +182,17 @@ public class SUtils {
      */
     public static boolean isGrantExternalRW(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && activity.checkSelfPermission(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
+                activity.checkSelfPermission(
+                        Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED  ) {
 
             activity.requestPermissions(new String[]{
                     Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_PHONE_STATE
             }, 1);
 
             return false;
-        }
-
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_PHONE_STATE) !=
-                PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(activity,
-                    new String[]{Manifest.permission.READ_PHONE_STATE}, 0);
         }
 
         return true;
@@ -309,7 +325,7 @@ public class SUtils {
         String data_path = context.getFilesDir().getParent();
         showLog("xyz","data_path : "+data_path);
         boolean sdCardExist = Environment.getExternalStorageState()
-                .equals(android.os.Environment.MEDIA_MOUNTED); //判断sd卡是否存在
+                .equals(Environment.MEDIA_MOUNTED); //判断sd卡是否存在
         if (!sdCardExist){
             return "";
         }

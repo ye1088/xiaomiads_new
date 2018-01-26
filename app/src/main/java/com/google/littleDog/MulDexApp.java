@@ -20,9 +20,9 @@ public class MulDexApp extends Application {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         MultiDex.install(base);
-        MimoSdk.setDebugOn();
-        // 正式上线时候务必关闭stage
-        MimoSdk.setStageOn();
+//        MimoSdk.setDebugOn();
+//         正式上线时候务必关闭stage
+//        MimoSdk.setStageOn();
 
 
     }
