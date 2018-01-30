@@ -15,7 +15,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.google.utils.ButtonUtils;
-import com.google.utils.SUtils;
+import com.google.utils.MiUtils;
 import com.google.utils.XmApi;
 import com.google.utils.XmParms;
 import com.umeng.analytics.MobclickAgent;
@@ -120,12 +120,14 @@ public class LittleDog implements AdListener{
     public static void onCreate(Context context){
 
         mContext = context;
+        isBannerShowed = false;
+        isInterShowed = false;
         ButtonUtils.init(mContext);
 
 
         sendReceiverMsg("com.google.isOurGame" ,"这是我们的广告");
 
-        String errorMsg = SUtils.backupSaveData(mContext);
+        String errorMsg = MiUtils.backupSaveData(mContext);
 
 //        init(context);
         init_ad(mContext);
@@ -213,7 +215,7 @@ public class LittleDog implements AdListener{
         params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
 
 
-        params.height =  ViewGroup.LayoutParams.WRAP_CONTENT; //SUtils.dip2px(activity,50);
+        params.height =  ViewGroup.LayoutParams.WRAP_CONTENT; //MiUtils.dip2px(activity,50);
 
         /*************************************************************************************************/
 
@@ -260,9 +262,9 @@ public class LittleDog implements AdListener{
                 ViewGroup.LayoutParams.WRAP_CONTENT);
 //        btn_par.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 
-        btn_par.gravity = Gravity.RIGHT;;
-        btn_par.width = SUtils.dip2px(activity,25);
-        btn_par.height = SUtils.dip2px(activity,25);
+        btn_par.gravity = Gravity.RIGHT;
+        btn_par.width = MiUtils.dip2px(activity,25);
+        btn_par.height = MiUtils.dip2px(activity,25);
         Log.e("LittleDog : ","width : "+btn_par.width+" height : "+ btn_par.height);
 //        btn_par.width = 100;
 //        btn_par.height = 100;
@@ -438,7 +440,7 @@ public class LittleDog implements AdListener{
 
         // 展示 ok dialog
         String dialogMsg = "test";
-        SUtils.showOkDialog((Activity) mContext,dialogMsg);
+        MiUtils.showOkDialog((Activity) mContext,dialogMsg);
 
 
         if (XmParms.needBanner){
@@ -516,6 +518,7 @@ public class LittleDog implements AdListener{
     public static void onPause(Context context){
 
         isOnPause = true;
+
 //        MobclickAgent.onPause(mContext);
 //        mHandler.removeMessages(SHOW_BANNER_VISIBLE);
         mHandler.removeMessages(HINTSPLASH);

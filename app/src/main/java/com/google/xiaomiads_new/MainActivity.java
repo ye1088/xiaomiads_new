@@ -23,17 +23,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void dianji(View v){
-        LittleDog.hideBanner();
-    }
-
-    public void dianji2(View v){
-        LittleDog.setVisibleBanner();
-    }
 
     @Override
     protected void onPause() {
         super.onPause();
         LittleDog.onPause(this);
+    }
+
+    public void bt_click(View view) {
+
+        switch (view.getId()){
+            case R.id.showBanner:
+                LittleDog.setVisibleBanner();
+                break;
+
+            case R.id.hideBanner:
+                LittleDog.hideBanner();
+                break;
+
+            case R.id.showInter:
+                LittleDog.show_ad();
+                break;
+        }
+
     }
 }

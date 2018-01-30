@@ -3,10 +3,8 @@ package com.google.utils;
 import android.content.Context;
 import android.content.res.AssetManager;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -27,7 +25,7 @@ public class DoMain {
         try {
             open = assets.open("zconfig.zbin");
 
-            JSONObject jsonObject = new JSONObject(SUtils.inputString2String(open));
+            JSONObject jsonObject = new JSONObject(MiUtils.inputString2String(open));
            initial_ads_id = jsonObject.getString("INITIAL_ADS_ID");
            banner_ads_id= jsonObject.getString("BANNER_ADS_ID");
            app_id= jsonObject.getString("APP_ID");

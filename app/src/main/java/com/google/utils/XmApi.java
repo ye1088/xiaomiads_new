@@ -47,6 +47,9 @@ public class XmApi implements AdListener {
 
 
     public static void onAppCreate(Context context){
+        if(XmParms.appCreate){
+            return;
+        }
         XmParms.appCreate = true;
 
 

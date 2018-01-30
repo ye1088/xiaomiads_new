@@ -30,7 +30,27 @@ public class ButtonUtils {
 
 
     static Context mContext;
-    static Handler mHandler;
+    static Handler mHandler = new Handler(){
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+
+                case COUNT_DOWN:
+                    countDown(msg.arg1,false);
+                    break;
+
+                case RECOVER:
+                    String aa = "要执行的方法";
+                    LittleDog.postShowInterstitial();
+                    MiUtils.sendMsg2Unity("myInject","recoverHealth","");
+                    showLog("recoverHealth");
+                    break;
+
+            }
+        }
+    };;
     static TextView countDown_tv;
     static AlertDialog dialog;
 
@@ -42,28 +62,7 @@ public class ButtonUtils {
     public static void init(Context context){
         mContext = context;
 //        countDown_tv = new TextView(mContext);
-        mHandler = new Handler(){
 
-
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                switch (msg.what){
-
-                    case COUNT_DOWN:
-                        countDown(msg.arg1,false);
-                        break;
-
-                    case RECOVER:
-                        String aa = "要执行的方法";
-                        LittleDog.postShowInterstitial();
-                        SUtils.sendMsg2Unity("myInject","recoverHealth","");
-                        showLog("recoverHealth");
-                        break;
-
-                }
-            }
-        };
 
     }
 
@@ -141,7 +140,7 @@ public class ButtonUtils {
         TextView tv = new TextView(mContext);
         tv.setText(text);
         // 文字大小
-        tv.setTextSize(TypedValue.COMPLEX_UNIT_PX,SUtils.dip2px(getActivity(),45));
+        tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, MiUtils.dip2px(getActivity(),45));
 //        tv.setAlpha(0x00000000);
         layout.addView(tv,button_param);
 //        layout.setOnClickListener(new View.OnClickListener() {
@@ -182,7 +181,7 @@ public class ButtonUtils {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 mHandler.removeMessages(RECOVER);
-                SUtils.sendMsg2Unity("myInject","PlayerKilled","");
+                MiUtils.sendMsg2Unity("myInject","PlayerKilled","");
             }
         });
         builder.setTitle("Warning");
