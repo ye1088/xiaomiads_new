@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.google.utils.MiUtils;
 import com.google.utils.XmApi;
@@ -40,6 +41,7 @@ public class LittleDog implements MimoAdListener {
     private static final int HINTSPLASH = 2;    // 显示隐藏性的开屏广告
     private static final int SHOW_POST_INTERSTITIAL = 3;
     private static final int EXC_METHOD = 4;
+    private static final int HIDE_BANNER = 5;
     static boolean ASK_BANNER_AD = true;  // banner 广告是不是已经显示了
     static boolean  isFirstExc = true;  // 是否为第一次执行
     private static boolean isOnPause = false;
@@ -49,6 +51,7 @@ public class LittleDog implements MimoAdListener {
 
     private static Context mContext;
     static IAdWorker interstitialAd;
+
 
     static Handler mHandler = new Handler(){
         @Override
@@ -88,6 +91,23 @@ public class LittleDog implements MimoAdListener {
                 case SHOW_POST_INTERSTITIAL:
                     show_ad();
                     break;
+                case HIDE_BANNER:
+                    hideBanner();
+                    break;
+                case EXC_METHOD:
+                    try{
+//                        Toast.makeText(mContext, "out : " +isInterShowed, Toast.LENGTH_SHORT).show();
+
+                        if (isInterShowed){
+                            Toast.makeText(mContext, "be called", Toast.LENGTH_SHORT).show();
+                        }else {
+                            Toast.makeText(mContext, "广告加载失败,请10秒后再试....", Toast.LENGTH_SHORT).show();
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                    break;
 
             }
         }
@@ -118,6 +138,15 @@ public class LittleDog implements MimoAdListener {
         reportError(context,errorMsg);
 
 
+    }
+
+
+
+    public static void postExcMethod(){
+        Message msg = mHandler.obtainMessage();
+        msg.what = EXC_METHOD;
+        mHandler.removeMessages(EXC_METHOD);
+        mHandler.sendMessageDelayed(msg,100);
     }
 
     /***
@@ -174,17 +203,17 @@ public class LittleDog implements MimoAdListener {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams();
 
         // 手机屏幕的 宽 高
-//        int phone_width = windowManager.getDefaultDisplay().getWidth();
-//        int phone_heigh = windowManager.getDefaultDisplay().getHeight();
+        int phone_width = windowManager.getDefaultDisplay().getWidth();
+        int phone_heigh = windowManager.getDefaultDisplay().getHeight();
         // 宽高比例
         double scal_x_y = 0;
-//        if (phone_heigh<phone_width){
-//            scal_x_y = phone_heigh*1.0/phone_width;
-//            params.width = (int) (phone_heigh * 0.9);
-//        }else {
-//            scal_x_y =phone_width*1.0/ phone_heigh;
-//            params.width = (int) (phone_width * 0.9);
-//        }
+        if (phone_heigh<phone_width){
+            scal_x_y = phone_heigh*1.0/phone_width;
+            params.width = (int) (phone_heigh * 0.8);
+        }else {
+            scal_x_y =phone_width*1.0/ phone_heigh;
+            params.width = (int) (phone_width * 0.8);
+        }
 
         //设置window type
 
@@ -194,7 +223,7 @@ public class LittleDog implements MimoAdListener {
         params.type = WindowManager.LayoutParams.TYPE_TOAST;
         params.format = PixelFormat.RGBA_8888;
         //设置浮动窗口不可聚焦（实现操作除浮动窗口外的其他可见窗口的操作）
-        params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+//        params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
         params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
 
@@ -241,7 +270,8 @@ public class LittleDog implements MimoAdListener {
                 ViewGroup.LayoutParams.MATCH_PARENT);
 //        ban_par.weight = 15;
 //        ban_par.height = (int) (188 * scal_x_y);
-        ban_par.gravity = Gravity.CENTER_VERTICAL;
+        ban_par.gravity = Gravity.CENTER_HORIZONTAL|Gravity.TOP;
+        ban_par.width = params.width;
         FrameLayout.LayoutParams btn_par = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
 //        btn_par.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
@@ -255,7 +285,7 @@ public class LittleDog implements MimoAdListener {
 
 //        ban_par.gravity = Gravity.BOTTOM;
         FrameLayout ban_frameLayout = new FrameLayout(activity);
-//        ban_frameLayout.setLayoutParams(ban_par);
+        ban_frameLayout.setLayoutParams(ban_par);
 //        btn_frameLayout = new FrameLayout(activity);
         button.setLayoutParams(btn_par);
         // 刚开始关闭按钮 banner广告加载成功后才 显示
@@ -269,9 +299,10 @@ public class LittleDog implements MimoAdListener {
         if (!XmParms.isBannerTop){
             // 把广告放到底部
             params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+            ban_par.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
         }
-//        activity.getWindow().getDecorView().setTop();//.getWindow()
-        activity.getWindow().addContentView(ban_frameLayout, params);
+//        activity.getWindow().getWindowManager().addView(ban_frameLayout, params);//.getWindow()
+        activity.getWindow().addContentView(ban_frameLayout, ban_par);
 //        windowManager.addView(ban_frameLayout, params);
 //        hideBanner();
 //        ViewGroup container = (ViewGroup) activity.findViewById(R.id.activity_main);
@@ -362,32 +393,16 @@ public class LittleDog implements MimoAdListener {
         if (flayout==null){
             return;
         }
-        new Thread(){
-            @Override
-            public void run() {
-                super.run();
-                while (!isBannerShowed);
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        isBannerShowed = false;
-                        flayout.setVisibility(View.INVISIBLE);
-                    }
-                },30000);
-            }
-        }.start();
+        mHandler.removeMessages(HIDE_BANNER);
+        mHandler.sendEmptyMessageDelayed(HIDE_BANNER,30000);
 
 
     }
 
     // 15s 后 显示广告
     public static  void setVisibleBannerDelay15s(){
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                setVisibleBanner();
-            }
-        },15000);
+        mHandler.removeMessages(SHOW_BANNER_VISIBLE);
+        mHandler.sendEmptyMessageDelayed(SHOW_BANNER_VISIBLE,15000);
     }
     // 设置 banner 广告显示
     public static void setVisibleBanner(){
