@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.google.littleDog.LittleDog;
+import com.google.utils.ButtonUtils;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.showInter:
                 LittleDog.show_ad();
+                break;
+            case R.id.selDialog:
+                ButtonUtils.postSelDialog();
                 break;
         }
 

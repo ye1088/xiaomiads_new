@@ -40,6 +40,8 @@ public class MiUtils {
     private static final int BUFF_SIZE = 1024 * 1024;
     static int[] sizes = {0,0};
     private static Context mContext ;
+    private static long currentTime = 0;
+    private static long oldTime = 0;
 
     private static Handler mHandler = new Handler(){
         @Override
@@ -48,19 +50,29 @@ public class MiUtils {
                 case 0:
 //                    Toast.makeText(mContext, "如果一直卡在这里请清除数据并给予游戏存储权限!!!!", Toast.LENGTH_LONG).show();
 
-                    pro_dialog.setMax(sizes[0]);
-                    pro_dialog.setTitle("解压数据中....");
-                    pro_dialog.setCancelable(false);
-                    pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                    pro_dialog.show();
+                    try {
+                        pro_dialog.setMax(sizes[0]);
+                        pro_dialog.setTitle("解压数据中....");
+                        pro_dialog.setCancelable(false);
+                        pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                        pro_dialog.show();
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
                     break;
                 case 1:
-                    pro_dialog.setMax(sizes[0]);
-                    pro_dialog.setTitle("解压数据中....");
-                    pro_dialog.setCancelable(false);
-                    pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                    pro_dialog.show();
-                    pro_dialog.setProgress(sizes[1]);
+                    try{
+                        pro_dialog.setMax(sizes[0]);
+                        pro_dialog.setTitle("解压数据中....");
+                        pro_dialog.setCancelable(false);
+                        pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                        pro_dialog.show();
+                        pro_dialog.setProgress(sizes[1]);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
 
                     break;
                 case -1:
@@ -69,6 +81,20 @@ public class MiUtils {
             }
         }
     };
+
+
+    public static boolean hasAccessTime(){
+
+        currentTime = System.currentTimeMillis();
+
+        if (currentTime-oldTime > 10000){
+            oldTime = currentTime;
+            return true;
+        }
+
+        return false;
+    }
+
 
     /**
      * 根据手机的分辨率从 dp 的单位 转成为 px(像素)

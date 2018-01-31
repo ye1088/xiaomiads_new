@@ -27,4 +27,10 @@
         android:text="显示插屏"
         android:onClick="bt_click"
         android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/selDialog"
+        android:layout_width="match_parent"
+        android:text="对话框广告"
+        android:onClick="bt_click"
+        android:layout_height="wrap_content" />
 </LinearLayout>

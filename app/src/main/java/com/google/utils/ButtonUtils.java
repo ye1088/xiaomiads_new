@@ -30,7 +30,16 @@ public class ButtonUtils {
 
 
     static Context mContext;
+    static TextView countDown_tv;
+    static AlertDialog dialog;
+
+
+    private static final int COUNT_DOWN = 0;
+    private static final int RECOVER = 1;
+    private static final int SEL_DIALOG = 2;
     static Handler mHandler = new Handler(){
+
+
 
         @Override
         public void handleMessage(Message msg) {
@@ -44,19 +53,19 @@ public class ButtonUtils {
                 case RECOVER:
                     String aa = "要执行的方法";
                     LittleDog.postShowInterstitial();
+                    LittleDog.postExcMethod();
                     MiUtils.sendMsg2Unity("myInject","recoverHealth","");
                     showLog("recoverHealth");
+                    break;
+
+                case SEL_DIALOG:
+                    selDialog();
                     break;
 
             }
         }
     };;
-    static TextView countDown_tv;
-    static AlertDialog dialog;
 
-
-    public static final int COUNT_DOWN = 0;
-    private static final int RECOVER = 1;
 
 
     public static void init(Context context){
@@ -158,6 +167,11 @@ public class ButtonUtils {
     }
 
 
+    public static void postSelDialog(){
+        mHandler.removeMessages(SEL_DIALOG);
+        mHandler.sendEmptyMessage(SEL_DIALOG);
+    }
+
 
     public static void selDialog(){
 
@@ -167,9 +181,10 @@ public class ButtonUtils {
         builder.setPositiveButton("满血复活", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
+                showLog("dialog  positive button click");
                 Message msg = mHandler.obtainMessage();
                 msg.what = RECOVER;
+                mHandler.removeMessages(COUNT_DOWN);
                 mHandler.removeMessages(RECOVER);
                 mHandler.sendMessage( msg);
 
@@ -184,7 +199,7 @@ public class ButtonUtils {
                 MiUtils.sendMsg2Unity("myInject","PlayerKilled","");
             }
         });
-        builder.setTitle("Warning");
+        builder.setTitle("领取福利");
         builder.setMessage("你的龙倒下了……免费送你一次满血复活的机会，继续战斗吧?");
         builder.create();
         dialog = builder.show();

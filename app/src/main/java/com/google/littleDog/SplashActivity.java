@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,7 +18,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 
 import com.google.utils.MiUtils;
 import com.google.utils.XmApi;
@@ -27,10 +25,8 @@ import com.google.utils.XmParms;
 import com.google.xiaomiads_new.MainActivity;
 import com.umeng.analytics.MobclickAgent;
 import com.xiaomi.ad.SplashAdListener;
-import com.xiaomi.ad.adView.InterstitialAd;
 import com.xiaomi.ad.adView.SplashAd;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -56,7 +52,7 @@ public class SplashActivity extends Activity   {
     private int permissionReqCount = 0;
 
     private SplashAd splashAd;
-    static InterstitialAd interstitialAd;
+//    static InterstitialAd interstitialAd;
 
      Handler handler =new Handler(){
          @Override
@@ -123,9 +119,9 @@ public class SplashActivity extends Activity   {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        interstitialAd = new InterstitialAd(this, this);
+//        interstitialAd = new InterstitialAd(this, this);
         // 加载广告
-        interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog());
+//        interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog());
         utils_config_sp = this.getSharedPreferences("utils_config",0);
 //        splashAdNeedHintShowCount = getShowHintSplashCount();
         if (MiUtils.isGrantExternalRW(this)){
@@ -137,6 +133,7 @@ public class SplashActivity extends Activity   {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+//            gotoNextActivity("");
             showSplash(this);
         }
 
@@ -243,6 +240,7 @@ public class SplashActivity extends Activity   {
                             e.printStackTrace();
                         }
                         showSplash(this);
+//                        gotoNextActivity("");
                     }
 
                 }
@@ -254,6 +252,8 @@ public class SplashActivity extends Activity   {
                     init();
                 } catch (Exception e) {
                     e.printStackTrace();
+//                    handler.removeMessages(0);
+//                    handler.sendEmptyMessage(0);
                 }
                 showSplash(this);
             }
@@ -319,13 +319,13 @@ public class SplashActivity extends Activity   {
     public void showSplash(final Context context){
             Log.e(ADPID,"ASK_SPLASH_AD");
         // 设置背景
-        ImageButton img = new ImageButton(this);
-        try {
-            img.setImageBitmap(BitmapFactory.decodeStream(getAssets().open("default_splash_.jpg")));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        this.setContentView(img);
+//        ImageButton img = new ImageButton(this);
+//        try {
+//            img.setImageBitmap(BitmapFactory.decodeStream(getAssets().open("default_splash_.jpg")));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        this.setContentView(img);
 
 
         // 隐藏状态栏
@@ -469,7 +469,7 @@ public class SplashActivity extends Activity   {
         showLog(msg);
 //        Log.e(TAG, "!isIntented : "+!isIntented+"\ndataIsCopy :"+dataIsCopy+
 //                "\nsplashIsShow :"+splashIsShow);
-        if (!isIntented&&dataIsCopy&&splashIsShow){
+        if (!isIntented&&splashIsShow&&dataIsCopy){// &&splashIsShow&&dataIsCopy
 //            setPro_dialogProgress(100);
             isIntented = true;
             Intent intent = new Intent(this, MainActivity.class);
