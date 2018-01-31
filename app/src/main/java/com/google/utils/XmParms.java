@@ -13,7 +13,7 @@ public class XmParms {
 
     public static boolean isdebug = false;
 
-    public static boolean isHengPin = true;
+    public static boolean isHengPin = false;
 
 
     public static boolean showInterstitialSplash = false;
@@ -28,6 +28,7 @@ public class XmParms {
     public static boolean isBannerTop = true;
     public static boolean isBannerCanClose = true;
     public static boolean isBannerAutoHide = true;
+    public static boolean isADCover = false;
     public static String pkgname = "demo.ad.xiaomi.com.myapplication";
     public static String launcher = "demo.ad.xiaomi.com.myapplication.MainActivity";
 

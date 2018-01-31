@@ -11,10 +11,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.miui.zeus.mimo.sdk.listener.AdListener;
 import com.umeng.analytics.MobclickAgent;
-import com.xiaomi.ad.common.pojo.AdError;
-import com.xiaomi.ad.common.pojo.MimoAdEvent;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,7 +25,7 @@ import java.util.Properties;
  * Created by appchina on 2016/10/27.
  */
 
-public class XmApi implements AdListener {
+public class XmApi  {
     public static String TAG = "wsyzg";
 
 
@@ -44,17 +41,20 @@ public class XmApi implements AdListener {
 
 
     public static void onAppCreate(Context context){
+        if(XmParms.appCreate){
+            return;
+        }
         XmParms.appCreate = true;
 
 
         loadProperities(context);
 
-        Log.e("xyz",XmParms.APP_ID+"\n"+XmParms.POSITION_ID+"\n"+XmParms.POSITION_ID_SPLASH+"\n"+XmParms.UMENG_KEY+"\n");
+        Log.e("xyz", XmParms.APP_ID+"\n"+ XmParms.POSITION_ID+"\n"+ XmParms.POSITION_ID_SPLASH+"\n"+ XmParms.UMENG_KEY+"\n");
 
         // 刚开始 就显示一次 插屏
 
 //        AdSdk.initialize(context.getApplicationContext(), XmParms.APP_ID);
-        MobclickAgent.UMAnalyticsConfig umconfig = new MobclickAgent.UMAnalyticsConfig(context,XmParms.UMENG_KEY,XmParms.UMENG_CHANNEL);
+        MobclickAgent.UMAnalyticsConfig umconfig = new MobclickAgent.UMAnalyticsConfig(context, XmParms.UMENG_KEY, XmParms.UMENG_CHANNEL);
         MobclickAgent.startWithConfigure(umconfig);
     }
 
@@ -81,32 +81,33 @@ public class XmApi implements AdListener {
         try {
             Properties pro = new Properties();
             pro.load(context.getAssets().open("pro.properties"));
-            XmParms.APP_ID = pro.getProperty("app_id").trim();
-            XmParms.BANNER_ID = pro.getProperty("banner_id").trim();
+            XmParms.APP_ID = pro.getProperty("app_id", XmParms.APP_ID).trim();
+            XmParms.BANNER_ID = pro.getProperty("banner_id", XmParms.BANNER_ID).trim();
             // 是否需要banner 广告
-            if (!"0".equals(pro.getProperty("needBanner"))) XmParms.needBanner = true;
+            if (!"0".equals(pro.getProperty("needBanner","1"))) XmParms.needBanner = true;
             // banner 广告显示的位置
-            if ("0".equals(pro.getProperty("isBannerTop"))) XmParms.isBannerTop = false;
-            if ("0".equals(pro.getProperty("isBannerCanClose"))) XmParms.isBannerCanClose = false;
-            if ("0".equals(pro.getProperty("isBannerAutoHide"))) XmParms.isBannerAutoHide = false;
-            if ("0".equals(pro.getProperty("isHengPin"))) XmParms.isHengPin = false;
+            if ("0".equals(pro.getProperty("isBannerTop","1"))) XmParms.isBannerTop = false;
+            if ("0".equals(pro.getProperty("isBannerCanClose","1"))) XmParms.isBannerCanClose = false;
+            if ("0".equals(pro.getProperty("isBannerAutoHide","1"))) XmParms.isBannerAutoHide = false;
+            if ("1".equals(pro.getProperty("isADCover","0"))) XmParms.isADCover = true;
+            if ("1".equals(pro.getProperty("isHengPin","0"))) XmParms.isHengPin = true;
 
             if (!XmParms.isHengPin){
                 //竖屏开屏广告id      竖屏广告
-                XmParms.POSITION_ID_SPLASH = pro.getProperty("position_id_splash_h").trim();
-                XmParms.POSITION_ID = pro.getProperty("position_id").trim();
+                XmParms.POSITION_ID_SPLASH = pro.getProperty("position_id_splash_h", XmParms.POSITION_ID_SPLASH).trim();
+                XmParms.POSITION_ID = pro.getProperty("position_id", XmParms.POSITION_ID).trim();
 
             }else {
                 //横屏 开屏广告id  横屏广告
-                XmParms.POSITION_ID_SPLASH = pro.getProperty("position_id_splash").trim();
-                XmParms.POSITION_ID = pro.getProperty("position_id_h").trim();
+                XmParms.POSITION_ID_SPLASH = pro.getProperty("position_id_splash", XmParms.POSITION_ID_SPLASH).trim();
+                XmParms.POSITION_ID = pro.getProperty("position_id_h", XmParms.POSITION_ID).trim();
             }
 //            Log.e("position_id_splash_h",XmParms.POSITION_ID_SPLASH+"  "+ isPortrait);
 
-            XmParms.pkgname = pro.getProperty("pkgname").trim();
-            XmParms.launcher = pro.getProperty("launcher").trim();
-            XmParms.UMENG_CHANNEL = pro.getProperty("umeng_channel").trim();
-            XmParms.UMENG_KEY = pro.getProperty("umeng_key").trim();
+            XmParms.pkgname = pro.getProperty("pkgname", XmParms.pkgname).trim();
+            XmParms.launcher = pro.getProperty("launcher", XmParms.launcher).trim();
+            XmParms.UMENG_CHANNEL = pro.getProperty("umeng_channel", XmParms.UMENG_CHANNEL).trim();
+            XmParms.UMENG_KEY = pro.getProperty("umeng_key", XmParms.UMENG_KEY).trim();
 //            XmParms.filelen = Long.parseLong(pro.getProperty("filelen"));
 //            XmParms.obbname = pro.getProperty("obbname");
         }catch (IOException e){
@@ -121,14 +122,14 @@ public class XmApi implements AdListener {
 //        mInterstitialAd = interstitialAd;
 //        mActivity = activity;
 //    }
-//    public static long timestmp = -1;
-//    public static long timeinterval = 1000*10;
+    public static long timestmp = -1;
+    public static long timeinterval = 1000*10;
 //    static InterstitialAd interstitialAd;
 
     private static Activity mActivity ;
 
     public static void showInterstitialAd(Activity activity){
-//
+
 //        if (!isInterstitialAdShowed){
 //            // 插屏广告初始化
 //            isInterstitialAdShowed = true;
@@ -159,18 +160,12 @@ public class XmApi implements AdListener {
     }
 
 
-    @Override
-    public void onAdError(AdError adError) {
-        Log.e(TAG, "onAdError : " + adError.toString());
-        MobclickAgent.onEvent(mActivity, XmParms.umeng_event_inter_error);
-        XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_error);
-    }
-
-    @Override
-    public void onAdEvent(MimoAdEvent mimoAdEvent) {
-
-    }
-
+//    @Override
+//    public void onAdError(AdError adError) {
+//        Log.e(TAG, "onAdError : " + adError.toString());
+//        MobclickAgent.onEvent(mActivity, XmParms.umeng_event_inter_error);
+//        XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_error);
+//    }
 //    @Override
 //    public void onAdEvent(AdEvent adEvent) {
 //        try {
@@ -195,15 +190,15 @@ public class XmApi implements AdListener {
 //            e.printStackTrace();
 //        }
 //    }
-    @Override
-    public void onAdLoaded() {
-        Log.e(TAG, "ad is loaded : ");
-//        interstitialAd.show();
-    }
-
-    // 这里是真正显示广告的地方
-    @Override
-    public void onViewCreated(View view) {
+//    @Override
+//    public void onAdLoaded() {
+//        Log.e(TAG, "ad is loaded : ");
+////        interstitialAd.show();
+//    }
+//
+//    // 这里是真正显示广告的地方
+//    @Override
+//    public void onViewCreated(View view) {
 //        Log.e(TAG, "ad is ready : -Xmapi ");
 //        Log.e(TAG, "showInterstitalad inner-Xmapi");
 //        mInterstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(mActivity,mInterstitialAd));
@@ -221,7 +216,7 @@ public class XmApi implements AdListener {
 //            XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_request);
 //            mInterstitialAd.requestAd(XmParms.POSITION_ID, new XmApi(mActivity,mInterstitialAd));
 //        }
-    }
+//    }
 
 
     public static void onLauncherCreate(Activity activity){
@@ -232,9 +227,9 @@ public class XmApi implements AdListener {
     }
 
     public static void first_show(Activity activity){
-//        if (!isFirstStart){
-//            isFirstStart = true;
-////            showInterstitialAd(activity);
+        if (!isFirstStart){
+            isFirstStart = true;
+//            showInterstitialAd(activity);
 //            if (interstitialAd.isReady()){
 //                interstitialAd.show();
 //            }else {
@@ -249,27 +244,27 @@ public class XmApi implements AdListener {
 //                    }
 //                },5000);
 //            }
-//
-//        }
+
+        }
     }
     public static void onLauncherStart(Activity activity){
         XmParms.launchStart = true;
     }
 
     public static void onLauncherResume( Activity activity){
-//
-//        XmParms.launchResume = true;
-////        showBanner(activity);
-//        // 解决频繁展示广告
-////        if(System.currentTimeMillis() - timestmp > timeinterval) {
-//            showInterstitialAd(activity);
-//            timestmp = System.currentTimeMillis();
-////        }
-//        MobclickAgent.onResume(activity);
-//
-//
-//
-//        first_show(activity);
+
+        XmParms.launchResume = true;
+//        showBanner(activity);
+        // 解决频繁展示广告
+//        if(System.currentTimeMillis() - timestmp > timeinterval) {
+            showInterstitialAd(activity);
+            timestmp = System.currentTimeMillis();
+//        }
+        MobclickAgent.onResume(activity);
+
+
+
+        first_show(activity);
     }
 
     public static void showBanner(final Activity activity){

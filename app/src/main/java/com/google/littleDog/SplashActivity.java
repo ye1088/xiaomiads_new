@@ -1,6 +1,5 @@
 package com.google.littleDog;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -8,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -19,7 +19,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import com.google.utils.SUtils;
+import com.google.utils.MiUtils;
 import com.google.utils.XmApi;
 import com.google.utils.XmParms;
 import com.google.xiaomiads_new.MainActivity;
@@ -28,6 +28,8 @@ import com.miui.zeus.mimo.sdk.ad.IAdWorker;
 import com.miui.zeus.mimo.sdk.listener.MimoAdListener;
 import com.umeng.analytics.MobclickAgent;
 import com.xiaomi.ad.common.pojo.AdType;
+
+import java.util.ArrayList;
 
 
 /**
@@ -49,11 +51,68 @@ public class SplashActivity extends Activity {
     private static boolean has_permission = false;
     private boolean dataIsCopy = false;
     private boolean splashIsShow = false;
+    private int permissionReqCount = 0;
     private int splashAdNeedHintShowCount = 0 ;// 开屏广告要隐匿展示的次数
     private static final String APP_KEY = "fake_app_key";
     private static final String APP_TOKEN = "fake_app_token";
 
-    static Handler handler;
+    Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+
+            if (msg.what != 4){
+                splashIsShow = true;
+            }
+            switch (msg.what){
+                case 0:
+                    gotoNextActivity("onSplashAdFailed");
+                    break;
+                case 1:
+                    gotoNextActivity("onSplashAdDismiss");
+                    break;
+                case 2:
+                    gotoNextActivity("isAdSkip ads");
+                    break;
+                case 3:
+                    gotoNextActivity("onResume");
+                    break;
+                case 4:
+                    gotoNextActivity("copyData");
+                    break;
+                case 5:
+                    gotoNextActivity("Copy Error");
+                    break;
+                case SHOWHINTSPLASH:
+//                        if (isNeedHintSplash()){
+//                            handler.sendEmptyMessageDelayed(SHOWHINTSPLASH,5000);
+//                            splashAd.requestAd(XmParms.POSITION_ID_SPLASH);
+//
+//                        }else {
+//                            gotoNextActivity("hint  splash");
+//                        }
+                    break;
+                case ADCLICK:
+                    gotoNextActivity("AD CLICK");
+                    break;
+                case SHOWPROGRESS:
+//                        int progress = msg.arg1;
+//                        Log.e(TAG,"progress : "+ progress);
+//                        setPro_dialogProgress(progress);
+//
+//                        Message progress_msg = handler.obtainMessage();
+//                        progress_msg.arg1 = progress + 10 ;
+//                        progress_msg.what = SHOWPROGRESS;
+//                        handler.sendMessageDelayed(progress_msg,1100);
+                    break;
+                default:
+                    splashIsShow = true;
+                    gotoNextActivity("default");
+                    break;
+            }
+
+
+        }
+    };
     private boolean isIntented = false;
     private SharedPreferences utils_config_sp ;
     private ProgressDialog pro_dialog = null;
@@ -67,7 +126,7 @@ public class SplashActivity extends Activity {
 
         utils_config_sp = this.getSharedPreferences("utils_config",0);
 //        splashAdNeedHintShowCount = getShowHintSplashCount();
-        if (SUtils.isGrantExternalRW(this)){
+        if (MiUtils.isGrantExternalRW(this)){
             has_permission = true;
             try {
 //                MimoSdk.setDebugOn();
@@ -150,29 +209,60 @@ public class SplashActivity extends Activity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == 1) {
+        if (requestCode==1){
+            ArrayList<String> denyPermissions = new ArrayList<>();
+
             for (int i = 0; i < permissions.length; i++) {
                 String permission = permissions[i];
-                int grantResult = grantResults[i];
+                int grant = grantResults[i];
+                if (grant != PackageManager.PERMISSION_GRANTED){
+                    denyPermissions.add(permission);
 
-                if (permission.equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                    if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                        //授权成功后的逻辑
+                }
+            }
+
+            if (denyPermissions.size() > 0){
+                String[] denyPermissionStr = new String[denyPermissions.size()];
+                for (int i = 0; i < denyPermissions.size(); i++) {
+                    denyPermissionStr[i] = denyPermissions.get(i);
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    permissionReqCount ++;
+                    if (permissionReqCount < 4){
+                        requestPermissions(denyPermissionStr,1);
+                    }else {
+
+                        Log.e(this.getLocalClassName(), "请求权限进入死循环了!!!!!!");
+                        Log.e(this.getLocalClassName(), "请求权限进入死循环了!!!!!!");
+                        Log.e(this.getLocalClassName(), "请求权限进入死循环了!!!!!!");
+                        for (int i = 0; i < denyPermissionStr.length; i++) {
+                            Log.e(this.getLocalClassName(), "问题权限 : " + denyPermissionStr[i]);
+                        }
                         has_permission = true;
                         try {
 
                             init();
-
                             showSplash(this);
                         } catch (Exception e) {
                             e.printStackTrace();
+                            splashIsShow = true;
+                            gotoNextActivity("sth error intent");
                         }
-
-
-                    } else {
-                        requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
                     }
                 }
+
+            }else{
+                has_permission = true;
+                try {
+
+                    init();
+                    showSplash(this);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    splashIsShow = true;
+                    gotoNextActivity("sth error intent");
+                }
+
             }
         }
     }
@@ -180,63 +270,7 @@ public class SplashActivity extends Activity {
     private void init() throws Exception {
 
 
-        handler = new Handler(){
-            @Override
-            public void handleMessage(Message msg) {
 
-                if (msg.what != 4){
-                    splashIsShow = true;
-                }
-                switch (msg.what){
-                    case 0:
-                        gotoNextActivity("onSplashAdFailed");
-                        break;
-                    case 1:
-                        gotoNextActivity("onSplashAdDismiss");
-                        break;
-                    case 2:
-                        gotoNextActivity("isAdSkip ads");
-                        break;
-                    case 3:
-                        gotoNextActivity("onResume");
-                        break;
-                    case 4:
-                        gotoNextActivity("copyData");
-                        break;
-                    case 5:
-                        gotoNextActivity("Copy Error");
-                        break;
-                    case SHOWHINTSPLASH:
-//                        if (isNeedHintSplash()){
-//                            handler.sendEmptyMessageDelayed(SHOWHINTSPLASH,5000);
-//                            splashAd.requestAd(XmParms.POSITION_ID_SPLASH);
-//
-//                        }else {
-//                            gotoNextActivity("hint  splash");
-//                        }
-                        break;
-                    case ADCLICK:
-                        gotoNextActivity("AD CLICK");
-                        break;
-                    case SHOWPROGRESS:
-//                        int progress = msg.arg1;
-//                        Log.e(TAG,"progress : "+ progress);
-//                        setPro_dialogProgress(progress);
-//
-//                        Message progress_msg = handler.obtainMessage();
-//                        progress_msg.arg1 = progress + 10 ;
-//                        progress_msg.what = SHOWPROGRESS;
-//                        handler.sendMessageDelayed(progress_msg,1100);
-                        break;
-                    default:
-                        splashIsShow = true;
-                        gotoNextActivity("default");
-                        break;
-                }
-
-
-            }
-        };
 
 
         /**
@@ -259,14 +293,14 @@ public class SplashActivity extends Activity {
 
 
 
-        if (SUtils.isFirstRun(this)||SUtils.isNewObbVersion(this)){
+        if (MiUtils.isFirstRun(this)||MiUtils.isNewObbVersion(this)){
 
             new Thread(){
                 @Override
                 public void run() {
                     super.run();
                     try {
-                        SUtils.copy_data(SplashActivity.this);
+                        MiUtils.copy_data(SplashActivity.this);
                         Message msg = handler.obtainMessage();
                         dataIsCopy = true;
                         msg.what = 4;
@@ -306,8 +340,8 @@ public class SplashActivity extends Activity {
 //                .getSystemService(context.WINDOW_SERVICE);
 //        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
 //        windowManager.addView(flayout,layoutParams);
-        String imgname = "default_splash_";
-        int imgid = getResources().getIdentifier(imgname, "drawable", getPackageName());
+//        String imgname = "default_splash_";
+//        int imgid = getResources().getIdentifier(imgname, "drawable", getPackageName());
 
 
         IAdWorker myAdWorker = AdWorkerFactory.getAdWorker(context, flayout, new MimoAdListener() {
@@ -360,7 +394,7 @@ public class SplashActivity extends Activity {
                 //这个方法被调用时，表示从服务器端请求开屏广告时，出现错误。
                 MobclickAgent.onEvent(SplashActivity.this, XmParms.umeng_event_splash_error);
                 XmParms.sBuilder.append("\n").append(XmParms.umeng_event_splash_error);
-//                handler.sendEmptyMessage(1);
+                handler.sendEmptyMessage(1);
             }
 
             @Override

@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.Build;
@@ -30,13 +31,17 @@ import java.util.zip.ZipInputStream;
  * Created by ye1088 on 2017/4/15.
  */
 
-public class SUtils {
+public class MiUtils {
 
     private static final String SAVE_DATA_PATH = "save_data";
     private static final boolean ISDEBUG = true;
+    //"8.0 部分游戏(青蛙)需要主动申请全部添加的权限,否则黑屏";
+    private static boolean O_Permission_CheckModel = true;
     private static final int BUFF_SIZE = 1024 * 1024;
     static int[] sizes = {0,0};
     private static Context mContext ;
+    private static long currentTime = 0;
+    private static long oldTime = 0;
 
     private static Handler mHandler = new Handler(){
         @Override
@@ -45,19 +50,29 @@ public class SUtils {
                 case 0:
 //                    Toast.makeText(mContext, "如果一直卡在这里请清除数据并给予游戏存储权限!!!!", Toast.LENGTH_LONG).show();
 
-                    pro_dialog.setMax(sizes[0]);
-                    pro_dialog.setTitle("解压数据中....");
-                    pro_dialog.setCancelable(false);
-                    pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                    pro_dialog.show();
+                    try {
+                        pro_dialog.setMax(sizes[0]);
+                        pro_dialog.setTitle("解压数据中....");
+                        pro_dialog.setCancelable(false);
+                        pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                        pro_dialog.show();
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
                     break;
                 case 1:
-                    pro_dialog.setMax(sizes[0]);
-                    pro_dialog.setTitle("解压数据中....");
-                    pro_dialog.setCancelable(false);
-                    pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                    pro_dialog.show();
-                    pro_dialog.setProgress(sizes[1]);
+                    try{
+                        pro_dialog.setMax(sizes[0]);
+                        pro_dialog.setTitle("解压数据中....");
+                        pro_dialog.setCancelable(false);
+                        pro_dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                        pro_dialog.show();
+                        pro_dialog.setProgress(sizes[1]);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
 
                     break;
                 case -1:
@@ -66,6 +81,20 @@ public class SUtils {
             }
         }
     };
+
+
+    public static boolean hasAccessTime(){
+
+        currentTime = System.currentTimeMillis();
+
+        if (currentTime-oldTime > 10000){
+            oldTime = currentTime;
+            return true;
+        }
+
+        return false;
+    }
+
 
     /**
      * 根据手机的分辨率从 dp 的单位 转成为 px(像素)
@@ -173,6 +202,24 @@ public class SUtils {
     }
 
 
+    /***
+     * 获取manifest文件中声明的所有权限
+     * @param activity
+     * @return
+     */
+    public static String[] myPermissions(Activity activity){
+        PackageManager pm = activity.getPackageManager();
+        PackageInfo pi;
+
+        try {
+            pi = pm.getPackageInfo(activity.getPackageName(), PackageManager.GET_PERMISSIONS);
+            String[] permissions = pi.requestedPermissions;
+            return permissions;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return new String[]{};
+        }
+    }
 
 
     /**
@@ -181,10 +228,45 @@ public class SUtils {
      * @return
      */
     public static boolean isGrantExternalRW(Activity activity) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && activity.checkSelfPermission(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
-                activity.checkSelfPermission(
-                        Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED  ) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ){
+            return true;
+        }
+
+
+        String[] myPermissions = myPermissions(activity);
+        if (myPermissions.length==0){
+            return  true;
+        }
+        ArrayList<String> denyPermissions = new ArrayList<>();
+        for (String myPermission :
+                myPermissions) {
+            if (activity.checkSelfPermission(
+                    myPermission) != PackageManager.PERMISSION_GRANTED){
+                denyPermissions.add(myPermission);
+            }
+        }
+
+        if (denyPermissions.size()==0){
+//            Toast.makeText(activity, "0", Toast.LENGTH_SHORT).show();
+            return  true;
+        }
+
+        if (Build.VERSION.SDK_INT >= 26 && O_Permission_CheckModel){
+            String[] deneypermissions = new String[denyPermissions.size()];
+            for (int i = 0; i < denyPermissions.size(); i++) {
+                deneypermissions[i] = denyPermissions.get(i);
+            }
+            activity.requestPermissions(deneypermissions, 1);
+            return false;
+        }
+
+        boolean flagNotStoragePermission = activity.checkSelfPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED;
+        boolean flagNotPhoneStatePermissiont =activity.checkSelfPermission(
+                Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && flagNotStoragePermission && flagNotPhoneStatePermissiont) {//&& Build.VERSION.SDK_INT < 26
 
             activity.requestPermissions(new String[]{
                     Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -194,6 +276,8 @@ public class SUtils {
 
             return false;
         }
+
+
 
         return true;
     }
@@ -325,7 +409,7 @@ public class SUtils {
         String data_path = context.getFilesDir().getParent();
         showLog("xyz","data_path : "+data_path);
         boolean sdCardExist = Environment.getExternalStorageState()
-                .equals(Environment.MEDIA_MOUNTED); //判断sd卡是否存在
+                .equals(android.os.Environment.MEDIA_MOUNTED); //判断sd卡是否存在
         if (!sdCardExist){
             return "";
         }

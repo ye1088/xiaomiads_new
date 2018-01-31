@@ -15,7 +15,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.google.utils.SUtils;
+import com.google.utils.MiUtils;
 import com.google.utils.XmApi;
 import com.google.utils.XmParms;
 import com.miui.zeus.mimo.sdk.ad.AdWorkerFactory;
@@ -61,23 +61,23 @@ public class LittleDog implements MimoAdListener {
             switch (msg.what){
                 case SHOW_BANNER_VISIBLE:
                     Log.e(TAG,"handler   :  SHOW_BANNER_VISIBLE");
-                    if (!getRootViewIsVisible()){
-                        setVisibleBanner();
-                    }
-//                    setVisibleBanner();
+//                    if (!getRootViewIsVisible()){
+//                        setVisibleBanner();
+//                    }
+                    setVisibleBanner();
 
                     break;
                 case SHOW_BANNER:
-                    if (!getRootViewIsVisible()){
-                        controlCloseButton(false);
-                        showBanner((Activity) mContext);
-                        Log.d(TAG,"SHOW_BANNER : handler");
-                    }
-                    message.what = SHOW_BANNER;
-                    if(canShowBanner&&!isOnPause){
-                        mHandler.removeMessages(SHOW_BANNER);
-                        mHandler.sendMessageDelayed(message,3000);
-                    }
+//                    if (!getRootViewIsVisible()){
+                    controlCloseButton(false);
+                    showBanner((Activity) mContext);
+                    Log.d(TAG,"SHOW_BANNER : handler");
+//                    }
+//                    message.what = SHOW_BANNER;
+//                    if(canShowBanner&&!isOnPause){
+//                        mHandler.removeMessages(SHOW_BANNER);
+//                        mHandler.sendMessageDelayed(message,3000);
+//                    }
 
                     break;
                 case HINTSPLASH:
@@ -96,6 +96,7 @@ public class LittleDog implements MimoAdListener {
 
     public static boolean getRootViewIsVisible(){
         if (flayout == null){
+            Log.e(TAG,"flayout is null ");
             return false;
         }
         if (flayout.getVisibility() == View.VISIBLE){
@@ -110,7 +111,7 @@ public class LittleDog implements MimoAdListener {
 //        // 正式上线时候务必关闭stage
 //        MimoSdk.setStageOn();
 
-        String errorMsg = SUtils.backupSaveData(context);
+        String errorMsg = MiUtils.backupSaveData(context);
 
 //        init(context);
         init_ad(context);
@@ -246,21 +247,21 @@ public class LittleDog implements MimoAdListener {
 //        btn_par.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 
         btn_par.gravity = Gravity.RIGHT;;
-        btn_par.width = SUtils.dip2px(activity,25);
-        btn_par.height = SUtils.dip2px(activity,25);
+        btn_par.width = MiUtils.dip2px(activity,25);
+        btn_par.height = MiUtils.dip2px(activity,25);
         Log.e("LittleDog : ","width : "+btn_par.width+" height : "+ btn_par.height);
 //        btn_par.width = 100;
 //        btn_par.height = 100;
 
 //        ban_par.gravity = Gravity.BOTTOM;
         FrameLayout ban_frameLayout = new FrameLayout(activity);
-        ban_frameLayout.setLayoutParams(ban_par);
+//        ban_frameLayout.setLayoutParams(ban_par);
 //        btn_frameLayout = new FrameLayout(activity);
         button.setLayoutParams(btn_par);
         // 刚开始关闭按钮 banner广告加载成功后才 显示
         controlCloseButton(false);
 
-        flayout.addView(ban_frameLayout);
+//        flayout.addView(ban_frameLayout);
         flayout.addView(button);
 
 
@@ -270,10 +271,10 @@ public class LittleDog implements MimoAdListener {
             params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
         }
 //        activity.getWindow().getDecorView().setTop();//.getWindow()
-//        activity.getWindow().addContentView(flayout, params);
-        windowManager.addView(flayout, params);
+        activity.getWindow().addContentView(ban_frameLayout, params);
+//        windowManager.addView(ban_frameLayout, params);
 //        hideBanner();
-//        ViewGroup container = (ViewGroup) activity.findViewById(R.id.container);
+//        ViewGroup container = (ViewGroup) activity.findViewById(R.id.activity_main);
         try {
             h5BannerAd = AdWorkerFactory.getAdWorker(activity,
                     ban_frameLayout, new MimoAdListener() {
@@ -340,7 +341,7 @@ public class LittleDog implements MimoAdListener {
             // 这个setvisibility  到时候要注释掉,
             canShowBanner = true;
 
-            flayout.setVisibility(View.VISIBLE);
+//            flayout.setVisibility(View.VISIBLE);
             h5BannerAd.loadAndShow(XmParms.BANNER_ID);
         } catch (Exception e) {
             e.printStackTrace();
@@ -349,6 +350,7 @@ public class LittleDog implements MimoAdListener {
 
 
     public static void hideBanner(){
+
         if (flayout==null){
             return;
         }
@@ -393,6 +395,7 @@ public class LittleDog implements MimoAdListener {
         Log.d(TAG,"isInterShowed : "+isInterShowed+"  isBannerShowed : "+isBannerShowed);
         if (flayout==null|| isInterShowed ||!isBannerShowed){//
             canShowBanner = true;
+            hideBanner();
             mHandler.removeMessages(SHOW_BANNER);
             mHandler.sendEmptyMessage(SHOW_BANNER);
 
@@ -402,7 +405,7 @@ public class LittleDog implements MimoAdListener {
 
         flayout.setVisibility(View.VISIBLE);
         try {
-            h5BannerAd.loadAndShow(XmParms.BANNER_ID);
+//            h5BannerAd.loadAndShow(XmParms.BANNER_ID);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -428,7 +431,7 @@ public class LittleDog implements MimoAdListener {
 
 
 //        initBanner((Activity) context);
-        showSplash((Activity)context);
+//        showSplash((Activity)context);
         XmApi.setOritation(((Activity)context).getRequestedOrientation());
         XmApi.onAppCreate(context);
 
@@ -493,34 +496,46 @@ public class LittleDog implements MimoAdListener {
 
     public static void onResume(final Context context){
 
-
+//        try {
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         isOnPause = false;
 //        requestSplashAd();
-        mHandler.sendEmptyMessage(HINTSPLASH);
+//        mHandler.sendEmptyMessage(HINTSPLASH);
         Log.d("LittleDog : ","onResume");
         MobclickAgent.onResume(context);
 
 //        LittleDog.setVisibleBanner();
 
 
+
+
+        if (XmParms.isADCover ){
+            return;
+        }
+        mHandler.removeMessages(SHOW_POST_INTERSTITIAL);
+        mHandler.sendEmptyMessageDelayed(SHOW_POST_INTERSTITIAL,3000);
+
         // 加载广告
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.d("LittleDog : ","run");
-
-                if (!isInterShowed){
-                    try {
-                        show_ad();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-
-
-            }
-        },3000);
+//        mHandler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                Log.d("LittleDog : ","run");
+//
+//                if (!isInterShowed){
+//                    try {
+//                        show_ad();
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//
+//
+//
+//            }
+//        },3000);
 
     }
 
@@ -539,21 +554,20 @@ public class LittleDog implements MimoAdListener {
 
 
     public static void show_ad(){
+        if (!MiUtils.hasAccessTime()){
+            return;
+        }
 
 
+        hideBanner();
         try {
             if (interstitialAd.isReady()){
                 mHandler.removeMessages(SHOW_BANNER_VISIBLE);
-    //            if (!isFirstExc){
-    //                hideBanner();
-    //            }else {
-    //                isFirstExc = false;
-    //            }
 
-                hideBanner();
-    //            if (isFirstExc){
-    //                isFirstExc = false;
-    //            }
+
+                if (isFirstExc){
+                    isFirstExc = false;
+                }
 
                 interstitialAd.show();
                 isInterShowed  = true;
@@ -570,25 +584,25 @@ public class LittleDog implements MimoAdListener {
 
     }
 
-    public static void show_ad(Context context) throws Exception {
-
-
-
-        if (interstitialAd.isReady()){
-            mHandler.removeMessages(SHOW_BANNER_VISIBLE);
-            if (!isFirstExc){
-                hideBanner();
-            }else {
-                isFirstExc = false;
-            }
-
-            interstitialAd.show();
-            isInterShowed  = true;
-        }
-        interstitialAd.load(XmParms.POSITION_ID) ;
-
-
-    }
+//    public static void show_ad(Context context) throws Exception {
+//
+//
+//
+//        if (interstitialAd.isReady()){
+//            mHandler.removeMessages(SHOW_BANNER_VISIBLE);
+//            if (!isFirstExc){
+//                hideBanner();
+//            }else {
+//                isFirstExc = false;
+//            }
+//
+//            interstitialAd.show();
+//            isInterShowed  = true;
+//        }
+//        interstitialAd.load(XmParms.POSITION_ID) ;
+//
+//
+//    }
 
 
 

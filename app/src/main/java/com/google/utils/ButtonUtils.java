@@ -57,7 +57,7 @@ public class ButtonUtils {
                     case RECOVER:
                         String aa = "要执行的方法";
                         LittleDog.postShowInterstitial();
-                        SUtils.sendMsg2Unity("myInject","recoverHealth","");
+                        MiUtils.sendMsg2Unity("myInject","recoverHealth","");
                         showLog("recoverHealth");
                         break;
 
@@ -133,7 +133,7 @@ public class ButtonUtils {
         params.format = PixelFormat.RGBA_8888;
 
 
-        params.height =  ViewGroup.LayoutParams.WRAP_CONTENT; //SUtils.dip2px(activity,50);
+        params.height =  ViewGroup.LayoutParams.WRAP_CONTENT; //MiUtils.dip2px(activity,50);
 
 
 
@@ -141,7 +141,7 @@ public class ButtonUtils {
         TextView tv = new TextView(mContext);
         tv.setText(text);
         // 文字大小
-        tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, SUtils.dip2px(getActivity(),45));
+        tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, MiUtils.dip2px(getActivity(),45));
 //        tv.setAlpha(0x00000000);
         layout.addView(tv,button_param);
 //        layout.setOnClickListener(new View.OnClickListener() {
@@ -182,7 +182,7 @@ public class ButtonUtils {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 mHandler.removeMessages(RECOVER);
-                SUtils.sendMsg2Unity("myInject","PlayerKilled","");
+                MiUtils.sendMsg2Unity("myInject","PlayerKilled","");
             }
         });
         builder.setTitle("Warning");
@@ -216,7 +216,7 @@ public class ButtonUtils {
         params.format = PixelFormat.RGBA_8888;
 
 
-        params.height =  ViewGroup.LayoutParams.WRAP_CONTENT; //SUtils.dip2px(activity,50);
+        params.height =  ViewGroup.LayoutParams.WRAP_CONTENT; //MiUtils.dip2px(activity,50);
 
         ImageButton button = new ImageButton(mContext);
         try {
