@@ -329,8 +329,8 @@ public class LittleDog implements AdListener{
                 }else if (adEvent.mType == AdEvent.TYPE_VIEW) {
                     Log.d(TAG, "ad has been showed!,这个是轮播事件");
                     isBannerShowed = true;
-                    // banner广告加载成功后才 显示关闭按钮
-                    controlCloseButton(true);
+
+
                     if (canShowBanner){
                         canShowBanner = false;
                         setVisibleBanner();
@@ -401,6 +401,7 @@ public class LittleDog implements AdListener{
 //        if (!XmParms.isADCover){
 //            mHandler.sendEmptyMessageDelayed(SHOW_BANNER_VISIBLE,360000);
 //        }
+        controlCloseButton(false);
         mHandler.removeMessages(SHOW_BANNER_VISIBLE);
         mHandler.sendEmptyMessageDelayed(SHOW_BANNER_VISIBLE,360000);
         flayout.setVisibility(View.INVISIBLE);
@@ -431,7 +432,7 @@ public class LittleDog implements AdListener{
 //        flayout.setVisibility(View.VISIBLE);
         Log.d(TAG,"isInterShowed : "+isInterShowed+"  isBannerShowed : "+isBannerShowed);
         if (flayout==null|| isInterShowed ||!isBannerShowed){//
-
+            Log.e(TAG,"set Visible banner failed ");
             hideBanner();
             canShowBanner = true;
             mHandler.removeMessages(SHOW_BANNER);
@@ -440,7 +441,8 @@ public class LittleDog implements AdListener{
             return;
         }
 
-
+        Log.e(TAG,"show banner success");
+        controlCloseButton(true);
         flayout.setVisibility(View.VISIBLE);
         // banner 广告自动关闭
         if (XmParms.isBannerAutoHide){
@@ -510,6 +512,8 @@ public class LittleDog implements AdListener{
 
             if (interstitialAd.isReady()) {
                 isInterShowed = true;
+                controlCloseButton(false);
+                hideBanner();
                 Log.e(TAG, "showInterstitalad---showed");
                 interstitialAd.show();
                 interstitialAd = new InterstitialAd(mContext,
