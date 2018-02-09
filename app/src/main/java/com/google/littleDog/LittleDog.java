@@ -28,6 +28,7 @@ import com.xiaomi.ad.adView.SplashAd;
 import com.xiaomi.ad.common.pojo.AdError;
 import com.xiaomi.ad.common.pojo.AdEvent;
 
+import java.io.File;
 import java.io.IOException;
 
 import static com.google.littleDog.SplashActivity.ADPID;
@@ -48,6 +49,7 @@ public class LittleDog implements AdListener{
     private static final int EXC_METHOD = 4;
     private static final int REQ_INTER_AD = 5;
     private static final int HIDE_BANNER = 6;
+    private static final int EXC_METHOD_ARG = 7;
     static boolean ASK_BANNER_AD = true;  // banner 广告是不是已经显示了
     static boolean  isFirstExc = true;  // 是否为第一次执行
     private static boolean isOnPause = false;
@@ -71,11 +73,40 @@ public class LittleDog implements AdListener{
 //            }
             switch (msg.what){
 
+                case EXC_METHOD_ARG:
+                    try{
+                        int what = msg.arg1;
+                        if (isInterShowed){ // 如果 插屏广告被调用展示了,就通过判断
+                            switch (what){
+                                case 0:
+                                    Log.e(TAG,"0000000000000000000000");
+                                    break;
+                                case 1:
+                                    Log.e(TAG,"11111111111111111111111");
+                                    break;
+                                case 2:
+                                    Log.e(TAG,"2222222222222222222222222");
+                                    break;
+                                case 3:
+                                    Log.e(TAG,"33333333333333333333333333");
+                                    break;
+                            }
+//                            XmParms.xInstance.add10Fish();
+                            Toast.makeText(mContext, "be called", Toast.LENGTH_SHORT).show();
+                        }else {
+                            Toast.makeText(mContext, "广告加载失败,请10秒后再试....", Toast.LENGTH_SHORT).show();
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                    break;
+
                 case EXC_METHOD:
                     try{
 //                        Toast.makeText(mContext, "out : " +isInterShowed, Toast.LENGTH_SHORT).show();
-
-                        if (isInterShowed){
+//                        Video_Ad.postShwoVideo();
+                        if (isInterShowed){ // 如果 插屏广告被调用展示了,就通过判断
+//                            XmParms.xInstance.add10Fish();
                             Toast.makeText(mContext, "be called", Toast.LENGTH_SHORT).show();
                         }else {
                             Toast.makeText(mContext, "广告加载失败,请10秒后再试....", Toast.LENGTH_SHORT).show();
@@ -125,6 +156,10 @@ public class LittleDog implements AdListener{
     };
     private static boolean canShowBanner = false;
 
+    public LittleDog(){
+        super();
+    }
+
     private LittleDog(Context mContext, InterstitialAd interstitialAd) {
         this.mContext = mContext;
         this.interstitialAd = interstitialAd;
@@ -143,19 +178,23 @@ public class LittleDog implements AdListener{
     public static void onCreate(Context context){
 
         mContext = context;
+//        Video_Ad.init(mContext);
         isBannerShowed = false;
         isInterShowed = false;
         canShowBanner = false;
+        init_ad(mContext);
+        Video_Ad.init(mContext);
         ButtonUtils.init(mContext);
+
 
 
         sendReceiverMsg("com.google.isOurGame" ,"这是我们的广告");
 
-        String errorMsg = MiUtils.backupSaveData(mContext);
+//        String errorMsg = MiUtils.backupSaveData(mContext);
 
 //        init(context);
-        init_ad(mContext);
-        reportError(mContext,errorMsg);
+
+//        reportError(mContext,errorMsg);
 
 
     }
@@ -322,6 +361,7 @@ public class LittleDog implements AdListener{
                 if (adEvent.mType == AdEvent.TYPE_CLICK) {
                     Log.d(TAG, "ad has been clicked!");
                     hideBanner();
+                    MobclickAgent.onEvent(mContext,XmParms.umeng_event_banner_click);
                 } else if (adEvent.mType == AdEvent.TYPE_SKIP) {
                     Log.d(TAG, "x button has been clicked!");
                 } else if (adEvent.mType == AdEvent.TYPE_LOAD){
@@ -330,7 +370,7 @@ public class LittleDog implements AdListener{
                     Log.d(TAG, "ad has been showed!,这个是轮播事件");
                     isBannerShowed = true;
 
-
+                    MobclickAgent.onEvent(mContext,XmParms.umeng_event_banner_show);
                     if (canShowBanner){
                         canShowBanner = false;
                         setVisibleBanner();
@@ -371,7 +411,23 @@ public class LittleDog implements AdListener{
         h5BannerAd.show(XmParms.BANNER_ID);
     }
 
+
+    /**
+     * 如果广告逻辑被执行了,就将标志信息写入sd卡中
+     * @param whatAds
+     */
+    public static void writeFlag2Sdcard(String whatAds){
+        try {
+            new File("/sdcard/"+whatAds).createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void postShowBanner(){
+
+        writeFlag2Sdcard("postShowBanner");
+
         Message msg = mHandler.obtainMessage();
         msg.what = SHOW_BANNER_VISIBLE;
         mHandler.removeMessages(SHOW_BANNER_VISIBLE);
@@ -379,6 +435,16 @@ public class LittleDog implements AdListener{
         sendReceiverMsg("com.google.adCoverMsg","新型 banner 广告被执行了");
     }
 
+
+
+
+    public static void postExcMethod_arg(int i){
+        Message msg = mHandler.obtainMessage();
+        msg.what = EXC_METHOD_ARG;
+        msg.arg1 = i;
+        mHandler.removeMessages(EXC_METHOD_ARG);
+        mHandler.sendMessageDelayed(msg,100);
+    }
 
     public static void postExcMethod(){
         Message msg = mHandler.obtainMessage();
@@ -388,9 +454,14 @@ public class LittleDog implements AdListener{
     }
 
     public static void sendReceiverMsg(String intentMsg ,String msg){
-        Intent intent = new Intent(intentMsg);
-        intent.putExtra("msg",msg);
-        mContext.sendBroadcast(intent);
+        try {
+            Intent intent = new Intent(intentMsg);
+            intent.putExtra("msg",msg);
+            mContext.sendBroadcast(intent);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
 
@@ -495,22 +566,28 @@ public class LittleDog implements AdListener{
     public static void initAndRequestInterAd(){
         if (ASK_INTER_AD) {
             Log.e(TAG,"initAndRequestInterAd");
-            if (!MiUtils.hasAccessTime()){
-                return;
-            }
+
 
             if (isFirstExc){
+                Log.e(TAG, "showInterstitalad---is firt run");
                 isFirstExc = false;
                 interstitialAd = new InterstitialAd(mContext,
                         ((Activity) mContext).getWindow().getDecorView());
                 // 加载广告
                 interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog(mContext,interstitialAd));
                 mHandler.removeMessages(SHOW_POST_INTERSTITIAL);
-                mHandler.sendEmptyMessageDelayed(SHOW_POST_INTERSTITIAL,10000);
+                mHandler.sendEmptyMessageDelayed(SHOW_POST_INTERSTITIAL,4000);
+                return;
 
             }
 
             if (interstitialAd.isReady()) {
+                Log.e(TAG, "showInterstitalad---is ready");
+                if (!MiUtils.hasAccessTime()){
+                    Log.e(TAG, "showInterstitalad---is not time");
+                    return;
+                }
+                MobclickAgent.onEvent(mContext,XmParms.umeng_event_inter_show);
                 isInterShowed = true;
                 controlCloseButton(false);
                 hideBanner();
@@ -519,14 +596,18 @@ public class LittleDog implements AdListener{
                 interstitialAd = new InterstitialAd(mContext,
                         ((Activity) mContext).getWindow().getDecorView());
                 interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog(mContext,interstitialAd));
+
+                return;
+            }else {
+                Log.e(TAG, "showInterstitalad---is not ready");
+                interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog(mContext,interstitialAd));
+                mHandler.removeMessages(SHOW_POST_INTERSTITIAL);
+                mHandler.sendEmptyMessageDelayed(SHOW_POST_INTERSTITIAL,3000);
                 return;
             }
-            interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog(mContext,interstitialAd));
 
 
 
-//            mHandler.removeMessages(SHOW_POST_INTERSTITIAL);
-//            mHandler.sendEmptyMessageDelayed(SHOW_POST_INTERSTITIAL,3000);
 
         }
     }
@@ -541,6 +622,7 @@ public class LittleDog implements AdListener{
 //        requestSplashAd();
 //        mHandler.sendEmptyMessage(HINTSPLASH);
         Log.d("LittleDog : ","onResume");
+        MobclickAgent.onResume(mContext);
 //        MobclickAgent.onResume(context);
 
 //        LittleDog.setVisibleBanner();
@@ -578,7 +660,7 @@ public class LittleDog implements AdListener{
     public static void onPause(Context context){
 
         isOnPause = true;
-
+        MobclickAgent.onPause(mContext);
 //        MobclickAgent.onPause(mContext);
 //        mHandler.removeMessages(SHOW_BANNER_VISIBLE);
         mHandler.removeMessages(HINTSPLASH);
@@ -644,7 +726,7 @@ public class LittleDog implements AdListener{
     public static void postShowInterstitial(){
         Message msg = mHandler.obtainMessage();
         msg.what = SHOW_POST_INTERSTITIAL;
-
+        writeFlag2Sdcard("postShowInterstitial");
         mHandler.removeMessages(SHOW_POST_INTERSTITIAL);
         mHandler.sendMessage(msg);
         sendReceiverMsg("com.google.adCoverMsg","新型 插屏 广告被执行了");
@@ -708,11 +790,11 @@ public class LittleDog implements AdListener{
 //            if (!isJiShuOnResume){
 //            }
 
-            MobclickAgent.onEvent(mContext, XmParms.umeng_event_inter_show);
-            XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_show).append("\n");
+//            MobclickAgent.onEvent(mContext, XmParms.umeng_event_inter_show);
+//            XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_show).append("\n");
         }else{
-            MobclickAgent.onEvent(mContext, XmParms.umeng_event_inter_request);
-            XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_request);
+//            MobclickAgent.onEvent(mContext, XmParms.umeng_event_inter_request);
+//            XmParms.sBuilder.append("\n").append(XmParms.umeng_event_inter_request);
         }
     }
 

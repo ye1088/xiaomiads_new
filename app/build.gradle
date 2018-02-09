@@ -31,4 +31,5 @@ dependencies {
     compile files('libs/umeng-analytics-v6.1.2.jar')
     implementation files('libs/AdSdk.jar')
     implementation files('libs/umeng-analytics-v6.1.2.jar')
+    implementation files('libs/UniplayAdSDK5.5.4.jar')
 }

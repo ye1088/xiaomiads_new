@@ -93,7 +93,7 @@ public class ButtonUtils {
         }
 
 //        countDown_tv.setText(""+left);
-        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(String.format("满血复活(%ds)", left));
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(String.format("看广告(%ds)", left));
         if (left == 0){
 //            countDown_tv.setText("");
             dialog.dismiss();
@@ -103,6 +103,7 @@ public class ButtonUtils {
         Message msg = mHandler.obtainMessage();
         msg.what = COUNT_DOWN;
         msg.arg1 = left -1;
+        mHandler.removeMessages(msg.what);
         mHandler.sendMessageDelayed(msg,1000);
         return left -1;
     }
@@ -117,6 +118,100 @@ public class ButtonUtils {
 
     public static WindowManager getWindowManager(){
         return (WindowManager)mContext.getSystemService(mContext.WINDOW_SERVICE);
+    }
+
+
+
+
+
+    public static void postSelDialog(){
+        mHandler.removeMessages(SEL_DIALOG);
+        mHandler.sendEmptyMessage(SEL_DIALOG);
+    }
+
+
+
+
+    public static void selDialog(){
+
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setCancelable(false);
+        builder.setPositiveButton("看广告", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                showLog("dialog  positive button click");
+                Message msg = mHandler.obtainMessage();
+                msg.what = RECOVER;
+                mHandler.removeMessages(COUNT_DOWN);
+                mHandler.removeMessages(RECOVER);
+                mHandler.sendMessage( msg);
+
+            }
+        });
+
+
+        builder.setNegativeButton("还是算了", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mHandler.removeMessages(RECOVER);
+                mHandler.removeMessages(COUNT_DOWN);
+                MiUtils.sendMsg2Unity("myInject","PlayerKilled","");
+
+            }
+        });
+        builder.setTitle("领取福利");
+        builder.setMessage("你的龙倒下了……免费送你一次满血复活的机会，继续战斗吧?");
+        builder.create();
+        ButtonUtils.dialog = builder.show();
+
+
+        // 倒计时
+        countDown(5, true);
+        // 显示广告并回血
+        Message msg = mHandler.obtainMessage();
+        msg.what = RECOVER;
+        mHandler.removeMessages(RECOVER);
+        mHandler.sendMessageDelayed( msg,5000 );
+
+    }
+
+
+    public static void showButton(){
+        FrameLayout layout = new FrameLayout(mContext);
+        layout.removeAllViews();
+        FrameLayout.LayoutParams button_param = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+
+        WindowManager manager = (WindowManager)mContext.getSystemService(mContext.WINDOW_SERVICE);
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+        params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        params.gravity = Gravity.LEFT | Gravity.TOP;
+        params.format = PixelFormat.RGBA_8888;
+
+
+        params.height =  ViewGroup.LayoutParams.WRAP_CONTENT; //SUtils.dip2px(activity,50);
+
+        ImageButton button = new ImageButton(mContext);
+        try {
+            button.setImageBitmap(BitmapFactory.decodeStream(mContext.getAssets().open("recover.png")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        Button button = new Button(mContext);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LittleDog.postShowInterstitial();
+            }
+        });
+//        button.setText("广告");
+        button.setBackgroundColor(0x00000000);
+        layout.addView(button,button_param);
+
+        manager.addView(layout,params);
     }
 
 
@@ -166,89 +261,4 @@ public class ButtonUtils {
 
     }
 
-
-    public static void postSelDialog(){
-        mHandler.removeMessages(SEL_DIALOG);
-        mHandler.sendEmptyMessage(SEL_DIALOG);
-    }
-
-
-    public static void selDialog(){
-
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setCancelable(false);
-        builder.setPositiveButton("满血复活", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                showLog("dialog  positive button click");
-                Message msg = mHandler.obtainMessage();
-                msg.what = RECOVER;
-                mHandler.removeMessages(COUNT_DOWN);
-                mHandler.removeMessages(RECOVER);
-                mHandler.sendMessage( msg);
-
-            }
-        });
-
-
-        builder.setNegativeButton("还是算了", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                mHandler.removeMessages(RECOVER);
-                MiUtils.sendMsg2Unity("myInject","PlayerKilled","");
-            }
-        });
-        builder.setTitle("领取福利");
-        builder.setMessage("你的龙倒下了……免费送你一次满血复活的机会，继续战斗吧?");
-        builder.create();
-        dialog = builder.show();
-
-
-        // 倒计时
-        countDown(5, true);
-        // 显示广告并回血
-        Message msg = mHandler.obtainMessage();
-        msg.what = RECOVER;
-        mHandler.removeMessages(RECOVER);
-        mHandler.sendMessageDelayed( msg,5000 );
-
-    }
-
-
-    public static void showButton(){
-        FrameLayout layout = new FrameLayout(mContext);
-        layout.removeAllViews();
-        FrameLayout.LayoutParams button_param = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-
-        WindowManager manager = (WindowManager)mContext.getSystemService(mContext.WINDOW_SERVICE);
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-        params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        params.gravity = Gravity.LEFT | Gravity.TOP;
-        params.format = PixelFormat.RGBA_8888;
-
-
-        params.height =  ViewGroup.LayoutParams.WRAP_CONTENT; //SUtils.dip2px(activity,50);
-
-        ImageButton button = new ImageButton(mContext);
-        try {
-            button.setImageBitmap(BitmapFactory.decodeStream(mContext.getAssets().open("recover.png")));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-//        Button button = new Button(mContext);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LittleDog.postShowInterstitial();
-            }
-        });
-//        button.setText("广告");
-        button.setBackgroundColor(0x00000000);
-        layout.addView(button,button_param);
-
-        manager.addView(layout,params);
-    }
 }

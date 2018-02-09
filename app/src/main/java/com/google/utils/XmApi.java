@@ -50,6 +50,9 @@ public class XmApi implements AdListener {
         if(XmParms.appCreate){
             return;
         }
+        MobclickAgent.UMAnalyticsConfig umconfig = new MobclickAgent.UMAnalyticsConfig(
+                context,XmParms.UMENG_KEY,XmParms.UMENG_CHANNEL);
+        MobclickAgent.startWithConfigure(umconfig);
         XmParms.appCreate = true;
 
 
@@ -60,8 +63,7 @@ public class XmApi implements AdListener {
         // 刚开始 就显示一次 插屏
 
         AdSdk.initialize(context.getApplicationContext(), XmParms.APP_ID);
-        MobclickAgent.UMAnalyticsConfig umconfig = new MobclickAgent.UMAnalyticsConfig(context,XmParms.UMENG_KEY,XmParms.UMENG_CHANNEL);
-        MobclickAgent.startWithConfigure(umconfig);
+
     }
 
 
@@ -89,6 +91,7 @@ public class XmApi implements AdListener {
             pro.load(context.getAssets().open("pro.properties"));
             XmParms.APP_ID = pro.getProperty("app_id",XmParms.APP_ID).trim();
             XmParms.BANNER_ID = pro.getProperty("banner_id",XmParms.BANNER_ID).trim();
+            XmParms.VIDEO_ID = pro.getProperty("video_id",XmParms.VIDEO_ID).trim();
             // 是否需要banner 广告
             if (!"0".equals(pro.getProperty("needBanner","1"))) XmParms.needBanner = true;
             // banner 广告显示的位置

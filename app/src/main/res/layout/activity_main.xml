@@ -33,4 +33,10 @@
         android:text="对话框广告"
         android:onClick="bt_click"
         android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/showVideo"
+        android:layout_width="match_parent"
+        android:text="视频广告"
+        android:onClick="bt_click"
+        android:layout_height="wrap_content" />
 </LinearLayout>

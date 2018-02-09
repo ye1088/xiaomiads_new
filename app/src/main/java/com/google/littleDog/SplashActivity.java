@@ -119,6 +119,8 @@ public class SplashActivity extends Activity   {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        XmApi.onAppCreate(this);
 //        interstitialAd = new InterstitialAd(this, this);
         // 加载广告
 //        interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog());
@@ -203,6 +205,8 @@ public class SplashActivity extends Activity   {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
+//        permissions = null;
+//        grantResults = null;
         if (requestCode==1){
             ArrayList<String> denyPermissions = new ArrayList<>();
 
@@ -270,7 +274,7 @@ public class SplashActivity extends Activity   {
          * 584912f375ca3528ff00056d : 是友盟 key
          */
         XmApi.setOritation(getRequestedOrientation());
-        XmApi.onAppCreate(this);
+
         if (XmParms.isHengPin){
             this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
@@ -428,6 +432,7 @@ public class SplashActivity extends Activity   {
     @Override
     protected void onResume() {
         super.onResume();
+        MobclickAgent.onResume(this);
         if (has_permission){
             MobclickAgent.onResume(this);
 
@@ -447,6 +452,7 @@ public class SplashActivity extends Activity   {
     @Override
     protected void onPause() {
         super.onPause();
+        MobclickAgent.onPause(this);
         if (has_permission){
             MobclickAgent.onPause(this);
         }

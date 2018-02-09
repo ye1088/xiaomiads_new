@@ -10,10 +10,12 @@ public class XmParms {
     public static String POSITION_ID = "0cfccfba30967d77ccc8e5a9fda3b3bc";
     public static String POSITION_ID_SPLASH = "a51b35db0bd342732b8c42b85e613959";
     public static String BANNER_ID = "54159a7b3571eb2315e19c00e071027b";
+    public static String VIDEO_ID = "1802050001";
 
     public static boolean isdebug = false;
 
     public static boolean isHengPin = false;
+    public static boolean isVideReady = false;
 
 
     public static boolean showInterstitialSplash = false;
@@ -53,6 +55,17 @@ public class XmParms {
     public static final String umeng_event_inter_close = "ad_inter_close";
     public static final String umeng_event_inter_click = "ad_inter_click";
     public static final String umeng_event_inter_error = "ad_inter_error";
+    public static final String umeng_event_banner_show = "ad_banner_show";
+    public static final String umeng_event_banner_click = "ad_banner_click";
+    public static final String umeng_event_video_show = "ad_video_show";
+    public static final String umeng_event_video_click = "ad_video_click";
     public static StringBuilder sBuilder = new StringBuilder();
+
+
+//    public static x xInstance;
+//
+//    public static void getXInstance(x a){
+//        xInstance = a;
+//    }
 
 }

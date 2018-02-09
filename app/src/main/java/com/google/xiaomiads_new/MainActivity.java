@@ -1,13 +1,14 @@
 package com.google.xiaomiads_new;
 
-import android.support.v7.app.AppCompatActivity;
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 
 import com.google.littleDog.LittleDog;
+import com.google.littleDog.Video_Ad;
 import com.google.utils.ButtonUtils;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.selDialog:
                 ButtonUtils.postSelDialog();
+                break;
+            case R.id.showVideo:
+                Video_Ad.postShwoVideo();
                 break;
         }
 
