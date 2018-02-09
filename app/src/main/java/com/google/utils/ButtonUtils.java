@@ -195,6 +195,7 @@ public class ButtonUtils {
         builder.setNegativeButton("还是算了", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                mHandler.removeMessages(COUNT_DOWN);
                 mHandler.removeMessages(RECOVER);
                 MiUtils.sendMsg2Unity("myInject","PlayerKilled","");
             }

@@ -131,11 +131,11 @@ public class LittleDog implements MimoAdListener {
 //        // 正式上线时候务必关闭stage
 //        MimoSdk.setStageOn();
 
-        String errorMsg = MiUtils.backupSaveData(context);
+//        String errorMsg = MiUtils.backupSaveData(context);
 
 //        init(context);
         init_ad(context);
-        reportError(context,errorMsg);
+//        reportError(context,errorMsg);
 
 
     }
@@ -447,8 +447,9 @@ public class LittleDog implements MimoAdListener {
 
 //        initBanner((Activity) context);
 //        showSplash((Activity)context);
-        XmApi.setOritation(((Activity)context).getRequestedOrientation());
         XmApi.onAppCreate(context);
+        XmApi.setOritation(((Activity)context).getRequestedOrientation());
+
 
         if (XmParms.needBanner){
             bannerLayout((Activity) context);
