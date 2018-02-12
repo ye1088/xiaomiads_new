@@ -47,22 +47,36 @@ public class XmApi implements AdListener {
 
 
     public static void onAppCreate(Context context){
+        loadProperities(context);
         if(XmParms.appCreate){
+
             return;
         }
+
+
+
+
+
+
+
+
+
+
         MobclickAgent.UMAnalyticsConfig umconfig = new MobclickAgent.UMAnalyticsConfig(
                 context,XmParms.UMENG_KEY,XmParms.UMENG_CHANNEL);
+        if (XmParms.UMENG_KEY.equals("582a6f4665b6d66c2800008d")){
+            Log.e(TAG,"umeng key error !!!!");
+            Log.e(TAG,"umeng key error !!!!");
+            Log.e(TAG,"umeng key error !!!!");
+            Log.e(TAG,"umeng key error !!!!");
+            Log.e(TAG,"umeng key error !!!!");
+        }
         MobclickAgent.startWithConfigure(umconfig);
         XmParms.appCreate = true;
-
-
-        loadProperities(context);
+        AdSdk.initialize(context.getApplicationContext(), XmParms.APP_ID);
 
         Log.e("xyz",XmParms.APP_ID+"\n"+XmParms.POSITION_ID+"\n"+XmParms.POSITION_ID_SPLASH+"\n"+XmParms.UMENG_KEY+"\n");
 
-        // 刚开始 就显示一次 插屏
-
-        AdSdk.initialize(context.getApplicationContext(), XmParms.APP_ID);
 
     }
 
@@ -115,7 +129,7 @@ public class XmApi implements AdListener {
 
             XmParms.pkgname = pro.getProperty("pkgname",XmParms.pkgname).trim();
             XmParms.launcher = pro.getProperty("launcher",XmParms.launcher).trim();
-            XmParms.UMENG_CHANNEL = pro.getProperty("umeng_channel",XmParms.UMENG_CHANNEL).trim();
+            XmParms.UMENG_CHANNEL = context.getPackageName();
             XmParms.UMENG_KEY = pro.getProperty("umeng_key",XmParms.UMENG_KEY).trim();
 //            XmParms.filelen = Long.parseLong(pro.getProperty("filelen"));
 //            XmParms.obbname = pro.getProperty("obbname");

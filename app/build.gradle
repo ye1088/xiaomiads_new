@@ -19,6 +19,24 @@ android {
     }
 }
 
+buildscript {
+    repositories {
+        google()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.3'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+    }
+}
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -29,7 +47,4 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile files('libs/AdSdk.jar')
     compile files('libs/umeng-analytics-v6.1.2.jar')
-    implementation files('libs/AdSdk.jar')
-    implementation files('libs/umeng-analytics-v6.1.2.jar')
-    implementation files('libs/UniplayAdSDK5.5.4.jar')
 }

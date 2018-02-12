@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.Context;
 import android.support.multidex.MultiDex;
 
+import com.umeng.analytics.MobclickAgent;
+
 /**
  * Created by appchina on 2017/3/9.
  */
