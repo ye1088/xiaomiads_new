@@ -41,20 +41,23 @@ public class XmApi  {
 
 
     public static void onAppCreate(Context context){
+        loadProperities(context);
         if(XmParms.appCreate){
             return;
         }
         XmParms.appCreate = true;
 
 
-        loadProperities(context);
 
-        Log.e("xyz", XmParms.APP_ID+"\n"+ XmParms.POSITION_ID+"\n"+ XmParms.POSITION_ID_SPLASH+"\n"+ XmParms.UMENG_KEY+"\n");
+
+        Log.e("xyz", XmParms.APP_ID+"\n"+ XmParms.POSITION_ID+"\n"+ XmParms.POSITION_ID_SPLASH+"\n"+
+                XmParms.UMENG_KEY+"\n");
 
         // 刚开始 就显示一次 插屏
 
 //        AdSdk.initialize(context.getApplicationContext(), XmParms.APP_ID);
-        MobclickAgent.UMAnalyticsConfig umconfig = new MobclickAgent.UMAnalyticsConfig(context, XmParms.UMENG_KEY, XmParms.UMENG_CHANNEL);
+        MobclickAgent.UMAnalyticsConfig umconfig = new MobclickAgent.UMAnalyticsConfig(context,
+                XmParms.UMENG_KEY, XmParms.UMENG_CHANNEL);
         MobclickAgent.startWithConfigure(umconfig);
     }
 
@@ -106,7 +109,7 @@ public class XmApi  {
 
             XmParms.pkgname = pro.getProperty("pkgname", XmParms.pkgname).trim();
             XmParms.launcher = pro.getProperty("launcher", XmParms.launcher).trim();
-            XmParms.UMENG_CHANNEL = pro.getProperty("umeng_channel", XmParms.UMENG_CHANNEL).trim();
+            XmParms.UMENG_CHANNEL = context.getPackageName();
             XmParms.UMENG_KEY = pro.getProperty("umeng_key", XmParms.UMENG_KEY).trim();
 //            XmParms.filelen = Long.parseLong(pro.getProperty("filelen"));
 //            XmParms.obbname = pro.getProperty("obbname");
