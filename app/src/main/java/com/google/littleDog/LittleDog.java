@@ -178,12 +178,11 @@ public class LittleDog implements AdListener{
     public static void onCreate(Context context){
 
         mContext = context;
-//        Video_Ad.init(mContext);
         isBannerShowed = false;
         isInterShowed = false;
         canShowBanner = false;
         init_ad(mContext);
-        Video_Ad.init(mContext);
+//        Video_Ad.init(mContext);
         ButtonUtils.init(mContext);
 
 

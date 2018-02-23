@@ -4,7 +4,7 @@ if not defined message goto input
 set message=%message:"=%
 git add .
 git commit -m "%message%"
-git push -u origin master
+git push -u origin adSdk_cover
 git status
 
 pause
