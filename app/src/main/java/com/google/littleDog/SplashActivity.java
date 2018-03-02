@@ -37,7 +37,7 @@ public class SplashActivity extends Activity   {
 
     static final String ADPID = "1705100002";
     private static final boolean ASK_BANNER_AD = true;
-    static final String UMENG_KEY = "58be889dae1bf87353001091";
+//    static final String UMENG_KEY = "58be889dae1bf87353001091";
     private static final int SHOWHINTSPLASH = 6;
     private static final int ADCLICK = 7;
     private static final int SHOWPROGRESS = 8;

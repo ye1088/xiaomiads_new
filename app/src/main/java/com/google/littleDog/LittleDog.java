@@ -364,7 +364,7 @@ public class LittleDog implements AdListener{
                 } else if (adEvent.mType == AdEvent.TYPE_SKIP) {
                     Log.d(TAG, "x button has been clicked!");
                 } else if (adEvent.mType == AdEvent.TYPE_LOAD){
-
+                    Log.d(TAG, "banner has load");
                 }else if (adEvent.mType == AdEvent.TYPE_VIEW) {
                     Log.d(TAG, "ad has been showed!,这个是轮播事件");
                     isBannerShowed = true;
@@ -562,7 +562,10 @@ public class LittleDog implements AdListener{
 
     }
 
+
+
     public static void initAndRequestInterAd(){
+
         if (ASK_INTER_AD) {
             Log.e(TAG,"initAndRequestInterAd");
 
@@ -692,7 +695,7 @@ public class LittleDog implements AdListener{
     public static void show_ad(){
 
 
-        hideBanner();
+
         mHandler.removeMessages(REQ_INTER_AD);
         mHandler.sendEmptyMessage(REQ_INTER_AD);
 

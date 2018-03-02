@@ -64,6 +64,9 @@ public class XmApi implements AdListener {
 
         MobclickAgent.UMAnalyticsConfig umconfig = new MobclickAgent.UMAnalyticsConfig(
                 context,XmParms.UMENG_KEY,XmParms.UMENG_CHANNEL);
+        Log.e("MobclickAgentxyz",XmParms.UMENG_KEY);
+        Log.e("MobclickAgentxyz",XmParms.UMENG_CHANNEL);
+//        MobclickAgent.setDebugMode(true);
         if (XmParms.UMENG_KEY.equals("582a6f4665b6d66c2800008d")){
             Log.e(TAG,"umeng key error !!!!");
             Log.e(TAG,"umeng key error !!!!");
