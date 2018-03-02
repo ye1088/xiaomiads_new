@@ -53,6 +53,8 @@ public class XmParms {
     public static final String umeng_event_inter_close = "ad_inter_close";
     public static final String umeng_event_inter_click = "ad_inter_click";
     public static final String umeng_event_inter_error = "ad_inter_error";
+    public static final String umeng_event_banner_show = "ad_banner_show";
+    public static final String umeng_event_banner_click = "ad_banner_click";
     public static StringBuilder sBuilder = new StringBuilder();
 
 }

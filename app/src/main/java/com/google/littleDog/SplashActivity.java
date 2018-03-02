@@ -23,6 +23,7 @@ import com.google.utils.MiUtils;
 import com.google.utils.XmApi;
 import com.google.utils.XmParms;
 import com.google.xiaomiads_new.MainActivity;
+import com.miui.zeus.mimo.sdk.MimoSdk;
 import com.miui.zeus.mimo.sdk.ad.AdWorkerFactory;
 import com.miui.zeus.mimo.sdk.ad.IAdWorker;
 import com.miui.zeus.mimo.sdk.listener.MimoAdListener;
@@ -122,7 +123,8 @@ public class SplashActivity extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-
+        XmApi.onAppCreate(this);
+        MimoSdk.init(this, XmParms.APP_ID, APP_KEY, APP_TOKEN);
 
         utils_config_sp = this.getSharedPreferences("utils_config",0);
 //        splashAdNeedHintShowCount = getShowHintSplashCount();

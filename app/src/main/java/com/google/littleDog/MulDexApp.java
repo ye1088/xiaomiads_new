@@ -4,10 +4,6 @@ import android.app.Application;
 import android.content.Context;
 import android.support.multidex.MultiDex;
 
-import com.google.utils.XmApi;
-import com.google.utils.XmParms;
-import com.miui.zeus.mimo.sdk.MimoSdk;
-
 /**
  * Created by appchina on 2017/3/9.
  */
@@ -30,8 +26,7 @@ public class MulDexApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        XmApi.onAppCreate(this);
-        MimoSdk.init(this, XmParms.APP_ID, APP_KEY, APP_TOKEN);
+
 
     }
 }

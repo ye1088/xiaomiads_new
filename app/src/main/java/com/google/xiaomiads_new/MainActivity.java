@@ -1,18 +1,22 @@
 package com.google.xiaomiads_new;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 
 import com.google.littleDog.LittleDog;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final String TAG = "xyz";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         LittleDog.onCreate(this);
+        Log.e(TAG,"MainActivity onCreate");
     }
 
     @Override
