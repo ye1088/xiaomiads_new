@@ -230,11 +230,11 @@ public class SplashActivity extends Activity   {
                         requestPermissions(denyPermissionStr,1);
                     }else {
 
-                        Log.e(this.getLocalClassName(),"请求权限进入死循环了!!!!!!");
-                        Log.e(this.getLocalClassName(),"请求权限进入死循环了!!!!!!");
-                        Log.e(this.getLocalClassName(),"请求权限进入死循环了!!!!!!");
+                        Log.e("xyz_"+this.getLocalClassName(),"请求权限进入死循环了!!!!!!");
+                        Log.e("xyz_"+this.getLocalClassName(),"请求权限进入死循环了!!!!!!");
+                        Log.e("xyz_"+this.getLocalClassName(),"请求权限进入死循环了!!!!!!");
                         for (int i = 0; i < denyPermissionStr.length; i++) {
-                            Log.e(this.getLocalClassName(),"问题权限 : " + denyPermissionStr[i]);
+                            Log.e("xyz_"+this.getLocalClassName(),"问题权限 : " + denyPermissionStr[i]);
                         }
                         has_permission = true;
                         try {
@@ -321,7 +321,7 @@ public class SplashActivity extends Activity   {
      * @param context
      */
     public void showSplash(final Context context){
-            Log.e(ADPID,"ASK_SPLASH_AD");
+            Log.e("xyz_"+ADPID,"ASK_SPLASH_AD");
         // 设置背景
 //        ImageButton img = new ImageButton(this);
 //        try {

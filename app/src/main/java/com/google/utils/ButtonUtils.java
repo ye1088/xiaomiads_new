@@ -77,7 +77,7 @@ public class ButtonUtils {
 
 
     public static void showLog(String msg){
-        Log.e("ButtonUtils",msg);
+        Log.e("ButtonUtils_xyz",msg);
     }
 
     /***

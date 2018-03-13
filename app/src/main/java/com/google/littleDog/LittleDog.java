@@ -327,7 +327,7 @@ public class LittleDog implements AdListener{
         btn_par.gravity = Gravity.RIGHT;
         btn_par.width = MiUtils.dip2px(activity,25);
         btn_par.height = MiUtils.dip2px(activity,25);
-        Log.e("LittleDog : ","width : "+btn_par.width+" height : "+ btn_par.height);
+        Log.e("xyz_LittleDog : ","width : "+btn_par.width+" height : "+ btn_par.height);
 //        btn_par.width = 100;
 //        btn_par.height = 100;
 
@@ -356,7 +356,7 @@ public class LittleDog implements AdListener{
 
             @Override
             public void onAdEvent(AdEvent adEvent) {
-                Log.d(TAG, "onAdEvent : "+ adEvent);
+                Log.d(TAG, "banner onAdEvent : "+ adEvent);
                 if (adEvent.mType == AdEvent.TYPE_CLICK) {
                     Log.d(TAG, "ad has been clicked!");
                     hideBanner();
@@ -384,6 +384,7 @@ public class LittleDog implements AdListener{
                 }else {
                     Log.d(TAG, "unknow : "+adEvent.mType);
                 }
+
             }
 
 
@@ -406,7 +407,7 @@ public class LittleDog implements AdListener{
 
     public static void showBanner(final Activity activity){
         isBannerShowed = false;
-        Log.d(TAG,"XmParms.BANNER_ID : "+XmParms.BANNER_ID);
+        Log.d(TAG,"request banner  and BANNER_ID : "+XmParms.BANNER_ID);
         h5BannerAd.show(XmParms.BANNER_ID);
     }
 
@@ -603,8 +604,8 @@ public class LittleDog implements AdListener{
             }else {
                 Log.e(TAG, "showInterstitalad---is not ready");
                 interstitialAd.requestAd(XmParms.POSITION_ID, new LittleDog(mContext,interstitialAd));
-                mHandler.removeMessages(SHOW_POST_INTERSTITIAL);
-                mHandler.sendEmptyMessageDelayed(SHOW_POST_INTERSTITIAL,3000);
+//                mHandler.removeMessages(SHOW_POST_INTERSTITIAL);
+//                mHandler.sendEmptyMessageDelayed(SHOW_POST_INTERSTITIAL,3000);
                 return;
             }
 
@@ -623,7 +624,7 @@ public class LittleDog implements AdListener{
         // 刷开屏广告展示量
 //        requestSplashAd();
 //        mHandler.sendEmptyMessage(HINTSPLASH);
-        Log.d("LittleDog : ","onResume");
+        Log.d("xyz_LittleDog : ","onResume");
         MobclickAgent.onResume(mContext);
 //        MobclickAgent.onResume(context);
 
@@ -663,6 +664,7 @@ public class LittleDog implements AdListener{
 
         isOnPause = true;
         MobclickAgent.onPause(mContext);
+
 //        MobclickAgent.onPause(mContext);
 //        mHandler.removeMessages(SHOW_BANNER_VISIBLE);
         mHandler.removeMessages(HINTSPLASH);
@@ -819,7 +821,7 @@ public class LittleDog implements AdListener{
     public static void showSplash(Activity context){
 
 
-        Log.e(ADPID,"ASK_SPLASH_AD");
+        Log.e(ADPID+"xyz_","ASK_SPLASH_AD");
 
 
 

@@ -94,7 +94,7 @@ public class MiUtils {
 
         currentTime = System.currentTimeMillis();
 
-        if (currentTime-oldTime > 10000){
+        if (currentTime-oldTime > 1000){
             oldTime = currentTime;
             return true;
         }

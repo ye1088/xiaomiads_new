@@ -32,7 +32,7 @@ import java.util.Properties;
  */
 
 public class XmApi implements AdListener {
-    public static String TAG = "wsyzg";
+    public static String TAG = "xyz_wsyzg";
 
 
 
@@ -90,7 +90,7 @@ public class XmApi implements AdListener {
         if (orientation != 1){
             isPortrait = false;
         }
-        Log.e("position_id_splash_h", String.valueOf(orientation));
+        Log.e("xyz_id_splash_h", String.valueOf(orientation));
     }
 
 
@@ -378,7 +378,7 @@ public class XmApi implements AdListener {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Log.e("writelog", "write log success");
+            Log.e("xyz_"+"writelog", "write log success");
         }
     }
 }
